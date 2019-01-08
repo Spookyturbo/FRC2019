@@ -85,7 +85,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    ahrs.getAngle()
+    System.out.print(ahrs.getAngle());
     //Gyro thingies go here
   }
 
