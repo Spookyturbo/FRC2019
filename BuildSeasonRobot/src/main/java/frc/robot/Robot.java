@@ -52,7 +52,8 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     m_autoSelected = m_chooser.getSelected();
-
+    double distance = sampleEncoder.getRaw();
+    
     System.out.println("Auto selected: " + m_autoSelected);
   }
 
@@ -63,7 +64,7 @@ public class Robot extends TimedRobot {
   public void autonomousPeriodic() {
     switch (m_autoSelected) {
       case kCustomAuto:
-      
+
         break;
       case kDefaultAuto:
       default:
