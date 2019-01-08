@@ -3,6 +3,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
 import com.kauailabs.navx.frc.AHRS;
 
@@ -17,7 +18,7 @@ public class Robot extends TimedRobot {
   //This is a comment
   //This is where the constructor for gyro goes
   AHRS ahrs = new AHRS(SPI.Port.kMXP); 
-
+Joystick Joy = new Joystick(0);
   private static final String kDefaultAuto = "Default";
   private static final String kCustomAuto = "My Auto";
   private String m_autoSelected;
@@ -85,7 +86,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    System.out.print(ahrs.getAngle());
+    System.out.println(ahrs.getAngle());
     //Gyro thingies go here
   }
 
