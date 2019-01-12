@@ -87,6 +87,11 @@ Joystick Joy = new Joystick(0);
   @Override
   public void teleopPeriodic() {
     System.out.println(ahrs.getAngle());
+    if (Joy.getRawButtonPressed(4) == true){
+      //whatever you want the button to do
+    }
+
+
     //Gyro thingies go here
   }
 
