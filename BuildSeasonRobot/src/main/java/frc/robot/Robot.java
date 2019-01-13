@@ -9,6 +9,7 @@ package frc.robot;
 
 import com.mindsensors.CANSD540;
 
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -21,7 +22,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * project.
  */
 public class Robot extends TimedRobot {
-  CANSD540 motor = new CANSD540(0);
+  //Control
+  Joystick leftJoy = new Joystick(0);
+  Joystick rightJoy = new Joystick(1);
+
+  //Motors
+  CANSD540 leftMotor = new CANSD540(0);
+  CANSD540 rightMotor = new CANSD540(1);
+
   private static final String kDefaultAuto = "Default";
   private static final String kCustomAuto = "My Auto";
   private String m_autoSelected;
@@ -89,6 +97,10 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
+    //Tank drive
+    leftMotor.set(leftJoy.getRawAxis(0));
+    rightMotor.set(-rightJoy.getRawAxis(0));
+
   }
 
   /**
