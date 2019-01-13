@@ -1,0 +1,28 @@
+{
+    "fileName": "mindsensors.json",
+    "name": "Mindsensors",
+    "version": "1.0",
+    "uuid": "5c9ef766-996f-44c1-9b0c-11aef1389b5b",
+    "mavenUrls": [],
+    "jsonUrl": "",
+    "javaDependencies": [
+        {
+            "groupId": "com.mindsensors",
+            "artifactId": "mindsensors",
+            "version": "1.0"
+        }
+    ],
+    "jniDependencies": [
+        {
+            "groupId": "com.mindsensors",
+            "artifactId": "cci",
+            "version": "1.0",
+            "isJar": false,
+            "skipInvalidPlatforms": true,
+            "validPlatforms": [
+                "linuxathena"
+            ]
+        }
+    ],
+    "cppDependencies": []
+}
