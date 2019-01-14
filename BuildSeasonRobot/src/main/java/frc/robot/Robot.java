@@ -20,6 +20,10 @@ public class Robot extends TimedRobot {
   //This is where the constructor for gyro goes
   AHRS ahrs = new AHRS(SPI.Port.kMXP); 
 Joystick Joy = new Joystick(0);
+<<<<<<< HEAD
+=======
+double Angle = 0;
+>>>>>>> f65914b434408dcee8b68063a596c98191d8c161
 
   private static final String kDefaultAuto = "Default";
   private static final String kCustomAuto = "My Auto";
@@ -88,11 +92,18 @@ Joystick Joy = new Joystick(0);
    */
   @Override
   public void teleopPeriodic() {
-    System.out.println(ahrs.getAngle());
+    Angle = ahrs.getAngle() % 360;
+    System.out.println(Angle);
     if (Joy.getRawButtonPressed(4) == true){
-      //whatever you want the button to do
+      if (Angle <45 && Angle > -45){
+        //make motors turn until it reaches -90 degrees
+      }
     }
-
+    if (Joy.getRawButtonPressed(5) == true){
+      if (Angle <45 && Angle > -45){
+        //make motors turn until it reaches 90 degrees
+      }
+    }
 
     //Gyro thingies go here
   }
