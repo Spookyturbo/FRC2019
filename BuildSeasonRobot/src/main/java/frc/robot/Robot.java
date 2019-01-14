@@ -27,8 +27,8 @@ public class Robot extends TimedRobot {
   Joystick rightJoy = new Joystick(1);
 
   //Motors
-  CANSD540 leftMotor = new CANSD540(0);
-  CANSD540 rightMotor = new CANSD540(1);
+  CANSD540 leftMotor = new CANSD540(2);
+  CANSD540 rightMotor = new CANSD540(3);
 
   private static final String kDefaultAuto = "Default";
   private static final String kCustomAuto = "My Auto";
