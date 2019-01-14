@@ -19,9 +19,11 @@ public class Robot extends TimedRobot {
   //This is a comment
   //This is where the constructor for gyro goes
   AHRS ahrs = new AHRS(SPI.Port.kMXP); 
-Joystick Joy = new Joystick(0);
+  CANSD540 leftMotor = new CANSD540(2);
+  CANSD540 rightMotor = new CANSD540(3);
+  Joystick Joy = new Joystick(0);
 double Angle = 0;
-
+sans = 666;
 
   private static final String kDefaultAuto = "Default";
   private static final String kCustomAuto = "My Auto";
@@ -94,12 +96,18 @@ double Angle = 0;
     System.out.println(Angle);
     if (Joy.getRawButtonPressed(4) == true){
       if (Angle <45 && Angle > -45){
-        //make motors turn until it reaches -90 degrees
+        while (Angle > 90){
+        rightMotor.set(0.5);
+        leftMotor.set(-0.5);
+        }
       }
     }
     if (Joy.getRawButtonPressed(5) == true){
       if (Angle <45 && Angle > -45){
-        //make motors turn until it reaches 90 degrees
+        while (Angle > 90){
+          rightMotor.set(-0.5);
+          leftMotor.set(0.5);
+        }
       }
     }
 
