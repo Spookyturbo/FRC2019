@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -26,8 +26,8 @@ public class Robot extends TimedRobot {
   Joystick leftJoy = new Joystick(0);
   Joystick rightJoy = new Joystick(1);
 
-  WPI_TalonSRX leftMotor = new WPI_TalonSRX(0);
   CANSD540 motor = new CANSD540(2);
+  WPI_VictorSPX victorMotor = new WPI_VictorSPX(0);
 
   private static final String kDefaultAuto = "Default";
   private static final String kCustomAuto = "My Auto";
@@ -96,8 +96,9 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    CANSD540.StopMode mode = CANSD540.StopMode.Brake;
-    System.out.println(mode);
+    // CANSD540.StopMode mode = CANSD540.StopMode.Brake;
+    // System.out.println(mode);
+    
   }
 
   /**
