@@ -5,8 +5,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
+
+import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
-import com.mindsensors.CANSD540;
+import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -19,11 +21,10 @@ public class Robot extends TimedRobot {
   //This is a comment
   //This is where the constructor for gyro goes
   AHRS ahrs = new AHRS(SPI.Port.kMXP); 
-  CANSD540 leftMotor = new CANSD540(2);
-  CANSD540 rightMotor = new CANSD540(3);
+  VictorSPX leftMotor = new VictorSPX(2);
+  VictorSPX rightMotor = new VictorSPX(3);
   Joystick Joy = new Joystick(0);
 double Angle = 0;
-sans = 666;
 
   private static final String kDefaultAuto = "Default";
   private static final String kCustomAuto = "My Auto";
