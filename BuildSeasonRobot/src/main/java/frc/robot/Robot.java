@@ -1,5 +1,4 @@
 package frc.robot;
-
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -7,6 +6,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
 import com.kauailabs.navx.frc.AHRS;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
+import edu.wpi.first.wpilibj.drive.MecanumDrive;
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the TimedRobot
@@ -22,6 +22,7 @@ public class Robot extends TimedRobot {
   WPI_VictorSPX rightMotor = new WPI_VictorSPX(3);
   Joystick Joy = new Joystick(0);
 double Angle = 0;
+MecanumDrive drive = new MecanumDrive(leftMotor, leftMotor, leftMotor, leftMotor);
 
   private static final String kDefaultAuto = "Default";
   private static final String kCustomAuto = "My Auto";
@@ -90,6 +91,7 @@ double Angle = 0;
    */
   @Override
   public void teleopPeriodic() {
+   // drive.driveCartesian(ySpeed, xSpeed, zRotation);
     Angle = ahrs.getAngle() % 360;
     System.out.println(Angle);
     if (Joy.getRawButtonPressed(4) == true){
