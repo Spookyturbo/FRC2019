@@ -8,11 +8,11 @@
 package frc.robot;
 
 import com.mindsensors.CANSD540;
-
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -26,9 +26,8 @@ public class Robot extends TimedRobot {
   Joystick leftJoy = new Joystick(0);
   Joystick rightJoy = new Joystick(1);
 
-  //Motors
-  CANSD540 leftMotor = new CANSD540(2);
-  CANSD540 rightMotor = new CANSD540(3);
+  WPI_TalonSRX leftMotor = new WPI_TalonSRX(0);
+  CANSD540 motor = new CANSD540(2);
 
   private static final String kDefaultAuto = "Default";
   private static final String kCustomAuto = "My Auto";
@@ -97,10 +96,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    //Tank drive
-    leftMotor.set(leftJoy.getRawAxis(0));
-    rightMotor.set(-rightJoy.getRawAxis(0));
-
+    CANSD540.StopMode mode = CANSD540.StopMode.Brake;
+    System.out.println(mode);
   }
 
   /**
