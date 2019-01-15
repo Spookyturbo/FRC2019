@@ -8,8 +8,7 @@ import edu.wpi.first.wpilibj.SPI;
 
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
-import com.ctre.phoenix.motorcontrol.can.VictorSPX;
-
+import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the TimedRobot
@@ -21,8 +20,8 @@ public class Robot extends TimedRobot {
   //This is a comment
   //This is where the constructor for gyro goes
   AHRS ahrs = new AHRS(SPI.Port.kMXP); 
-  VictorSPX leftMotor = new VictorSPX(2);
-  VictorSPX rightMotor = new VictorSPX(3);
+  WPI_VictorSPX leftMotor = new WPI_VictorSPX(2);
+  WPI_VictorSPX rightMotor = new WPI_VictorSPX(3);
   Joystick Joy = new Joystick(0);
 double Angle = 0;
 
