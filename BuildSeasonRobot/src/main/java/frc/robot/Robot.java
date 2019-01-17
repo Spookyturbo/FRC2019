@@ -21,8 +21,6 @@ public class Robot extends TimedRobot {
   WPI_VictorSPX leftMotor = new WPI_VictorSPX(2);
   WPI_VictorSPX rightMotor = new WPI_VictorSPX(3);
   Joystick Joy = new Joystick(0);
-double Angle = 0;
-//Donde esta la biblioteca?
 MecanumDrive drive = new MecanumDrive(frontLeftMotor, rearLeftMotor, frontRightMotor, rearRightMotor)
 
   private static final String kDefaultAuto = "Default";
@@ -39,6 +37,7 @@ MecanumDrive drive = new MecanumDrive(frontLeftMotor, rearLeftMotor, frontRightM
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
+    ahrs.reset();
   }
 
   /**
@@ -93,22 +92,22 @@ MecanumDrive drive = new MecanumDrive(frontLeftMotor, rearLeftMotor, frontRightM
   @Override
   public void teleopPeriodic() {
    // drive.driveCartesian(ySpeed, xSpeed, zRotation);
-    Angle = ahrs.getAngle() % 360;
+    double Angle = ahrs.getAngle() % 360;
     System.out.println(Angle);
     if (Joy.getRawButtonPressed(4) == true){
-      if (Angle <45 && Angle > -45){
-        while (Angle <= 90){
-          drive.driveCartesian(0, 0, 0.5);
-        }
-      }
-    }
-    if (Joy.getRawButtonPressed(5) == true){
-      if (Angle <45 && Angle > -45){
-        while (Angle > -90){
+      ahrs.reset();
+        while (ahrs.getAngle() % 360 >= -90){
           drive.driveCartesian(0, 0, -0.5);
         }
+        drive.driveCartesian(0, 0, 0);
       }
-    }
+      if (Joy.getRawButtonPressed(5) == true){
+        ahrs.reset();
+          while (ahrs.getAngle() % 360 <= 90){
+            drive.driveCartesian(0, 0, 0.5);
+          }
+          drive.driveCartesian(0, 0, 0);
+        }
 
     //Gyro thingies go here
   }
