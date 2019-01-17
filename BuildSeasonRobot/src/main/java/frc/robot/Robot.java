@@ -22,7 +22,7 @@ public class Robot extends TimedRobot {
   WPI_VictorSPX rightMotor = new WPI_VictorSPX(3);
   Joystick Joy = new Joystick(0);
 double Angle = 0;
-MecanumDrive drive = new MecanumDrive(leftMotor, leftMotor, leftMotor, leftMotor);
+MecanumDrive drive = new MecanumDrive(frontLeftMotor, rearLeftMotor, frontRightMotor, rearRightMotor)
 
   private static final String kDefaultAuto = "Default";
   private static final String kCustomAuto = "My Auto";
@@ -96,17 +96,15 @@ MecanumDrive drive = new MecanumDrive(leftMotor, leftMotor, leftMotor, leftMotor
     System.out.println(Angle);
     if (Joy.getRawButtonPressed(4) == true){
       if (Angle <45 && Angle > -45){
-        while (Angle > 90){
-        rightMotor.set(0.5);
-        leftMotor.set(-0.5);
+        while (Angle <= 90){
+          drive.driveCartesian(0, 0, 0.5);
         }
       }
     }
     if (Joy.getRawButtonPressed(5) == true){
       if (Angle <45 && Angle > -45){
-        while (Angle > 90){
-          rightMotor.set(-0.5);
-          leftMotor.set(0.5);
+        while (Angle > -90){
+          drive.driveCartesian(0, 0, -0.5);
         }
       }
     }
