@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;;
+import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the TimedRobot
@@ -49,7 +49,6 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
   }
   
-  Encoder enc = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
   Encoder sampleEncoder = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
 
 
@@ -80,7 +79,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
 
-    if  (sampleEncoder.get ()<20 ) {
+    if  (sampleEncoder.get ()<1000 ) {
        drive.driveCartesian(10, 0, 0);
     }
     int count = sampleEncoder.get();
