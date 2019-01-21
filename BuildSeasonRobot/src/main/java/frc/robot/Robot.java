@@ -6,12 +6,12 @@
 /*----------------------------------------------------------------------------*/
 
 package frc.robot;
-
+import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
+import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;;
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the TimedRobot
@@ -24,7 +24,11 @@ public class Robot extends TimedRobot {
   private static final String kCustomAuto = "My Auto";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
-
+  WPI_VictorSPX Fleftmotor = new WPI_VictorSPX(1);
+   WPI_VictorSPX Brightmotor = new WPI_VictorSPX(1);
+   WPI_VictorSPX Frightmotor = new WPI_VictorSPX(1);
+   WPI_VictorSPX Bleftmotor = new WPI_VictorSPX(1);
+   MecanumDrive drive = new MecanumDrive(Fleftmotor, Brightmotor, Frightmotor, Bleftmotor);
   /**
    * This function is run when the robot is first started up and should be
    * used for any initialization code.
@@ -73,11 +77,12 @@ public class Robot extends TimedRobot {
     }
   }
 
-  /**
-   * This function is called periodically during operator control.
-   */
   @Override
   public void teleopPeriodic() {
+
+    if  (sampleEncoder.get ()<20 ) {
+       drive.driveCartesian(10, 0, 0);
+    }
     int count = sampleEncoder.get();
     System.out.println ("count"+count);
   }
