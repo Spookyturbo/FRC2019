@@ -18,11 +18,12 @@ public class Robot extends TimedRobot {
   //This is a comment
   //This is where the constructor for gyro goes
   AHRS ahrs = new AHRS(SPI.Port.kMXP); 
-  WPI_VictorSPX leftMotor = new WPI_VictorSPX(2);
-  WPI_VictorSPX rightMotor = new WPI_VictorSPX(3);
+  WPI_VictorSPX frontLeftMotor = new WPI_VictorSPX(1);
+  WPI_VictorSPX rearLeftMotor = new WPI_VictorSPX(2);
+  WPI_VictorSPX frontRightMotor = new WPI_VictorSPX(3);
+  WPI_VictorSPX rearRightMotor = new WPI_VictorSPX(4);
   Joystick Joy = new Joystick(0);
-MecanumDrive drive = new MecanumDrive(frontLeftMotor, rearLeftMotor, frontRightMotor, rearRightMotor)
-
+MecanumDrive drive = new MecanumDrive(frontLeftMotor, rearLeftMotor, frontRightMotor, rearRightMotor);
   private static final String kDefaultAuto = "Default";
   private static final String kCustomAuto = "My Auto";
   private String m_autoSelected;
