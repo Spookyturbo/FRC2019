@@ -8,10 +8,13 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
+
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 
 /**
@@ -22,14 +25,13 @@ import edu.wpi.first.wpilibj.drive.MecanumDrive;
  * project.
  */
 public class Robot extends TimedRobot {
-  //Control
-  Joystick leftJoy = new Joystick(0);
-  Joystick rightJoy = new Joystick(1);
+  //Xbox Control
+  Joystick xBox = new Joystick(0);
 
-  WPI_VictorSPX FL = new WPI_VictorSPX(0);
-  WPI_VictorSPX BL = new WPI_VictorSPX(0);
-  WPI_VictorSPX FR = new WPI_VictorSPX(0);
-  WPI_VictorSPX BR = new WPI_VictorSPX(0);
+  WPI_VictorSPX FL = new WPI_VictorSPX(1);
+  WPI_VictorSPX BL = new WPI_VictorSPX(2);
+  WPI_VictorSPX FR = new WPI_VictorSPX(3);
+  WPI_VictorSPX BR = new WPI_VictorSPX(4);
 
   MecanumDrive drive = new MecanumDrive(FL, BL, FR, BR);
 
@@ -100,7 +102,11 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    drive.driveCartesian(0, 0, 0);
+    double y = -xBox.getRawAxis(1);
+    double x = xBox.getRawAxis(0);
+    double rotate = xBox.getRawAxis(4);
+
+    drive.driveCartesian(x, y, rotate);
   }
 
   /**
