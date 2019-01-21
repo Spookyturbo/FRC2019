@@ -1,12 +1,16 @@
 package frc.robot;
+
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.SPI;
 import com.kauailabs.navx.frc.AHRS;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
+
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the TimedRobot
@@ -14,24 +18,28 @@ import edu.wpi.first.wpilibj.drive.MecanumDrive;
  * creating this project, you must also update the build.gradle file in the
  * project.
  */
-public class Robot extends TimedRobot {
-  //This is a comment
-  //This is where the constructor for gyro goes
-  AHRS ahrs = new AHRS(SPI.Port.kMXP); 
+public class Robot extends TimedRobot implements PIDOutput {
+
+  // This is a comment
+  // This is where the constructor for gyro goes
+  AHRS ahrs = new AHRS(SPI.Port.kMXP);
   WPI_VictorSPX frontLeftMotor = new WPI_VictorSPX(1);
   WPI_VictorSPX rearLeftMotor = new WPI_VictorSPX(2);
   WPI_VictorSPX frontRightMotor = new WPI_VictorSPX(3);
   WPI_VictorSPX rearRightMotor = new WPI_VictorSPX(4);
   Joystick Joy = new Joystick(0);
-MecanumDrive drive = new MecanumDrive(frontLeftMotor, rearLeftMotor, frontRightMotor, rearRightMotor);
+  PIDController turnController = new PIDController(0.03, 0, 0.05, ahrs, this);
+  double turnRate;
+  MecanumDrive drive = new MecanumDrive(frontLeftMotor, rearLeftMotor, frontRightMotor, rearRightMotor);
   private static final String kDefaultAuto = "Default";
   private static final String kCustomAuto = "My Auto";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
-//comment
+
+  // comment
   /**
-   * This function is run when the robot is first started up and should be
-   * used for any initialization code.
+   * This function is run when the robot is first started up and should be used
+   * for any initialization code.
    */
   @Override
   public void robotInit() {
@@ -39,15 +47,23 @@ MecanumDrive drive = new MecanumDrive(frontLeftMotor, rearLeftMotor, frontRightM
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
     ahrs.reset();
+    turnController.setInputRange(-180.0f, 180.0f);
+    turnController.setOutputRange(-0.5, 0.5);
+    turnController.setAbsoluteTolerance(2);
+    turnController.setContinuous(true);
+    turnController.setSetpoint(0);
+    turnController.enable();
+
   }
 
   /**
-   * This function is called every robot packet, no matter the mode. Use
-   * this for items like diagnostics that you want ran during disabled,
-   * autonomous, teleoperated and test.
+   * This function is called every robot packet, no matter the mode. Use this for
+   * items like diagnostics that you want ran during disabled, autonomous,
+   * teleoperated and test.
    *
-   * <p>This runs after the mode specific periodic functions, but before
-   * LiveWindow and SmartDashboard integrated updating.
+   * <p>
+   * This runs after the mode specific periodic functions, but before LiveWindow
+   * and SmartDashboard integrated updating.
    */
   @Override
   public void robotPeriodic() {
@@ -55,14 +71,15 @@ MecanumDrive drive = new MecanumDrive(frontLeftMotor, rearLeftMotor, frontRightM
 
   /**
    * This autonomous (along with the chooser code above) shows how to select
-   * between different autonomous modes using the dashboard. The sendable
-   * chooser code works with the Java SmartDashboard. If you prefer the
-   * LabVIEW Dashboard, remove all of the chooser code and uncomment the
-   * getString line to get the auto name from the text box below the Gyro
+   * between different autonomous modes using the dashboard. The sendable chooser
+   * code works with the Java SmartDashboard. If you prefer the LabVIEW Dashboard,
+   * remove all of the chooser code and uncomment the getString line to get the
+   * auto name from the text box below the Gyro
    *
-   * <p>You can add additional auto modes by adding additional comparisons to
-   * the switch structure below with additional strings. If using the
-   * SendableChooser make sure to add them to the chooser code above as well.
+   * <p>
+   * You can add additional auto modes by adding additional comparisons to the
+   * switch structure below with additional strings. If using the SendableChooser
+   * make sure to add them to the chooser code above as well.
    */
   @Override
   public void autonomousInit() {
@@ -76,15 +93,13 @@ MecanumDrive drive = new MecanumDrive(frontLeftMotor, rearLeftMotor, frontRightM
    */
   @Override
   public void autonomousPeriodic() {
-    switch (m_autoSelected) {
-      case kCustomAuto:
-        // Put custom auto code here
-        break;
-      case kDefaultAuto:
-      default:
-        // Put default auto code here
-        break;
-    }
+    drive.driveCartesian(0, 0, turnRate);
+
+  }
+
+  @Override
+  public void teleopInit() {
+ahrs.reset();
   }
 
   /**
@@ -92,25 +107,22 @@ MecanumDrive drive = new MecanumDrive(frontLeftMotor, rearLeftMotor, frontRightM
    */
   @Override
   public void teleopPeriodic() {
-   // drive.driveCartesian(ySpeed, xSpeed, zRotation);
+    // drive.driveCartesian(ySpeed, xSpeed, zRotation);
     double Angle = ahrs.getAngle() % 360;
     System.out.println(Angle);
-    if (Joy.getRawButtonPressed(4) == true){
+    if (Joy.getRawButtonPressed(6) == true) {
       ahrs.reset();
-        while (ahrs.getAngle() % 360 >= -90){
-          drive.driveCartesian(0, 0, -0.5);
-        }
-        drive.driveCartesian(0, 0, 0);
-      }
-      if (Joy.getRawButtonPressed(5) == true){
-        ahrs.reset();
-          while (ahrs.getAngle() % 360 <= 90){
-            drive.driveCartesian(0, 0, 0.5);
-          }
-          drive.driveCartesian(0, 0, 0);
-        }
+      turnController.setSetpoint(90);
 
-    //Gyro thingies go here
+    }
+
+    if (Joy.getRawButtonPressed(5) == true) {
+      ahrs.reset();
+      turnController.setSetpoint(-90);
+    }
+    drive.driveCartesian(0, 0, turnRate);
+    System.out.print(ahrs.getAngle());
+    // Gyro thingies go here
   }
 
   /**
@@ -118,5 +130,10 @@ MecanumDrive drive = new MecanumDrive(frontLeftMotor, rearLeftMotor, frontRightM
    */
   @Override
   public void testPeriodic() {
+  }
+
+  @Override
+  public void pidWrite(double output) {
+    turnRate = output;
   }
 }
