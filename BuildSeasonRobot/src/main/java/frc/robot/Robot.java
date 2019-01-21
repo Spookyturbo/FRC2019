@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -34,6 +35,8 @@ public class Robot extends TimedRobot {
   WPI_VictorSPX BR = new WPI_VictorSPX(4);
 
   MecanumDrive drive = new MecanumDrive(FL, BL, FR, BR);
+
+  AnalogInput sonar = new AnalogInput(0);
 
   private static final String kDefaultAuto = "Default";
   private static final String kCustomAuto = "My Auto";
@@ -102,6 +105,13 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
+    double coolData;
+double storedData = sonar.getVoltage(); 
+coolData = (storedData/(5f/1024f)); 
+coolData/=2.54;
+System.out.println (coolData);
+
+
     double y = -xBox.getRawAxis(1);
     double x = xBox.getRawAxis(0);
     double rotate = xBox.getRawAxis(4);
