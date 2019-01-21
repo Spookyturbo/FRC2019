@@ -25,9 +25,9 @@ public class Robot extends TimedRobot {
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
   WPI_VictorSPX Fleftmotor = new WPI_VictorSPX(1);
-   WPI_VictorSPX Brightmotor = new WPI_VictorSPX(1);
-   WPI_VictorSPX Frightmotor = new WPI_VictorSPX(1);
-   WPI_VictorSPX Bleftmotor = new WPI_VictorSPX(1);
+   WPI_VictorSPX Brightmotor = new WPI_VictorSPX(4);
+   WPI_VictorSPX Frightmotor = new WPI_VictorSPX(3);
+   WPI_VictorSPX Bleftmotor = new WPI_VictorSPX(2);
    MecanumDrive drive = new MecanumDrive(Fleftmotor, Brightmotor, Frightmotor, Bleftmotor);
   /**
    * This function is run when the robot is first started up and should be
