@@ -53,6 +53,8 @@ public class Robot extends TimedRobot implements PIDOutput {
     turnController.setContinuous(true);
     turnController.setSetpoint(0);
     turnController.enable();
+    SmartDashboard.putNumber("Motorspeed", frontLeftMotor.get());
+
 
   }
 
@@ -109,7 +111,10 @@ ahrs.reset();
   public void teleopPeriodic() {
     // drive.driveCartesian(ySpeed, xSpeed, zRotation);
     double Angle = ahrs.getAngle() % 360;
-    System.out.println(Angle);
+    SmartDashboard.putNumber("Angle", ahrs.getAngle());
+    double MotorSpeed = SmartDashboard.getNumber("Motorspeed", frontLeftMotor.get());
+    System.out.println(MotorSpeed);
+
     if (Joy.getRawButtonPressed(6) == true) {
       ahrs.reset();
       turnController.setSetpoint(90);
@@ -122,6 +127,9 @@ ahrs.reset();
     }
     drive.driveCartesian(0, 0, turnRate);
     System.out.print(ahrs.getAngle());
+
+    frontLeftMotor.set(MotorSpeed);
+    frontRightMotor.set(MotorSpeed);
     // Gyro thingies go here
   }
 
