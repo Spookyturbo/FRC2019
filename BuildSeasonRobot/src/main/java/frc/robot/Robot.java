@@ -6,12 +6,14 @@
 /*----------------------------------------------------------------------------*/
 
 package frc.robot;
+
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
+
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the TimedRobot
@@ -25,21 +27,22 @@ public class Robot extends TimedRobot {
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
   WPI_VictorSPX Fleftmotor = new WPI_VictorSPX(1);
-   WPI_VictorSPX Brightmotor = new WPI_VictorSPX(4);
-   WPI_VictorSPX Frightmotor = new WPI_VictorSPX(3);
-   WPI_VictorSPX Bleftmotor = new WPI_VictorSPX(2);
-   MecanumDrive drive = new MecanumDrive(Fleftmotor, Brightmotor, Frightmotor, Bleftmotor);
+  WPI_VictorSPX Brightmotor = new WPI_VictorSPX(4);
+  WPI_VictorSPX Frightmotor = new WPI_VictorSPX(3);
+  WPI_VictorSPX Bleftmotor = new WPI_VictorSPX(2);
+  MecanumDrive drive = new MecanumDrive(Fleftmotor, Brightmotor, Frightmotor, Bleftmotor);
+
   /**
-   * This function is run when the robot is first started up and should be
-   * used for any initialization code.
+   * This function is run when the robot is first started up and should be used
+   * for any initialization code.
    */
   @Override
   public void robotInit() {
-      sampleEncoder.setMaxPeriod(.1);
-  sampleEncoder.setMinRate(10);
-  sampleEncoder.setDistancePerPulse(5);
-  sampleEncoder.setReverseDirection(true);
-  sampleEncoder.setSamplesToAverage(7);
+    sampleEncoder.setMaxPeriod(.1);
+    sampleEncoder.setMinRate(10);
+    sampleEncoder.setDistancePerPulse(5);
+    sampleEncoder.setReverseDirection(true);
+    sampleEncoder.setSamplesToAverage(7);
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
@@ -48,15 +51,14 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
   }
-  
-  Encoder sampleEncoder = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
 
+  Encoder sampleEncoder = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
 
   @Override
   public void autonomousInit() {
     m_autoSelected = m_chooser.getSelected();
     double distance = sampleEncoder.getRaw();
-    
+
     System.out.println("Auto selected: " + m_autoSelected);
   }
 
@@ -66,25 +68,26 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousPeriodic() {
     switch (m_autoSelected) {
-      case kCustomAuto:
+    case kCustomAuto:
 
-        break;
-      case kDefaultAuto:
-      default:
-      
-        break;
+      break;
+    case kDefaultAuto:
+    default:
+
+      break;
     }
   }
 
   @Override
   public void teleopPeriodic() {
 
-    if  (sampleEncoder.get ()<1000 ) {
-       drive.driveCartesian(10, 0, 0);
+    if (sampleEncoder.get() < 1000) {
+      drive.driveCartesian(10, 0, 0);
     }
     int count = sampleEncoder.get();
-    System.out.println ("count"+count);
+    System.out.println("count" + count);
   }
+
   /**
    * This function is called periodically during test mode.
    */
