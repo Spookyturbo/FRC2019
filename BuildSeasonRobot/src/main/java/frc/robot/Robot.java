@@ -1,39 +1,30 @@
-/*----------------------------------------------------------------------------*/
-/* Copyright (c) 2017-2018 FIRST. All Rights Reserved.                        */
-/* Open Source Software - may be modified and shared by FRC teams. The code   */
-/* must be accompanied by the FIRST BSD license file in the root directory of */
-/* the project.                                                               */
-/*----------------------------------------------------------------------------*/
-
 package frc.robot;
 
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.GenericHID.Hand;
+import edu.wpi.first.wpilibj.drive.MecanumDrive;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.SPI;
+
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.drive.MecanumDrive;
+import com.kauailabs.navx.frc.AHRS;
 
-/**
- * The VM is configured to automatically run this class, and to call the
- * functions corresponding to each mode, as described in the TimedRobot
- * documentation. If you change the name of this class or the package after
- * creating this project, you must also update the build.gradle file in the
- * project.
- */
 public class Robot extends TimedRobot {
   //Xbox Control
-  Joystick xBox = new Joystick(0);
+  XboxController xbox = new XboxController(OI.Driver.port);
 
-  WPI_VictorSPX FL = new WPI_VictorSPX(1);
-  WPI_VictorSPX BL = new WPI_VictorSPX(2);
-  WPI_VictorSPX FR = new WPI_VictorSPX(3);
-  WPI_VictorSPX BR = new WPI_VictorSPX(4);
+  WPI_VictorSPX FL = new WPI_VictorSPX(RobotMap.Motors.FLDrive);
+  WPI_VictorSPX BL = new WPI_VictorSPX(RobotMap.Motors.BLDrive);
+  WPI_VictorSPX FR = new WPI_VictorSPX(RobotMap.Motors.FRDrive);
+  WPI_VictorSPX BR = new WPI_VictorSPX(RobotMap.Motors.BRDrive);
 
   MecanumDrive drive = new MecanumDrive(FL, BL, FR, BR);
+
+  AHRS gyro;
 
   private static final String kDefaultAuto = "Default";
   private static final String kCustomAuto = "My Auto";
@@ -49,6 +40,13 @@ public class Robot extends TimedRobot {
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
+
+    //If the gyro is not plugged in this can throw an error, make sure it doesn't crash the robot
+    try {
+      gyro = new AHRS(SPI.Port.kMXP);
+    } catch (RuntimeException e) { 
+      DriverStation.reportError("Error instantiating navX MXP:  " + e.getMessage(), true); 
+    }
   }
 
   /**
@@ -63,17 +61,6 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
   }
 
-  /**
-   * This autonomous (along with the chooser code above) shows how to select
-   * between different autonomous modes using the dashboard. The sendable
-   * chooser code works with the Java SmartDashboard. If you prefer the
-   * LabVIEW Dashboard, remove all of the chooser code and uncomment the
-   * getString line to get the auto name from the text box below the Gyro
-   *
-   * <p>You can add additional auto modes by adding additional comparisons to
-   * the switch structure below with additional strings. If using the
-   * SendableChooser make sure to add them to the chooser code above as well.
-   */
   @Override
   public void autonomousInit() {
     m_autoSelected = m_chooser.getSelected();
@@ -107,9 +94,9 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    double y = -xBox.getRawAxis(1);
-    double x = xBox.getRawAxis(0);
-    double rotate = xBox.getRawAxis(4);
+    double y = -xbox.getY(Hand.kLeft);
+    double x = xbox.getX(Hand.kLeft);
+    double rotate = xbox.getX(Hand.kRight);
 
     drive.driveCartesian(x, y, rotate);
   }
