@@ -8,6 +8,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
+import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -46,6 +47,8 @@ public class Robot extends TimedRobot {
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
+    sampleEncoder.setName("ControlSystems", "Encoder");
+    LiveWindow.add(sampleEncoder);
   }
 
   @Override
@@ -80,12 +83,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-
-    if (sampleEncoder.get() < 1000) {
-      drive.driveCartesian(10, 0, 0);
-    }
-    int count = sampleEncoder.get();
-    System.out.println("count" + count);
+    System.out.println(sampleEncoder.getRaw());
   }
 
   /**
