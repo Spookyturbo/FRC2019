@@ -7,13 +7,20 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
-
+import com.kauailabs.navx.frc.AHRS;
+import edu.wpi.first.wpilibj.SPI;
+import jaci.pathfinder.Pathfinder;
+import jaci.pathfinder.PathfinderFRC;
+import jaci.pathfinder.Trajectory;
+import jaci.pathfinder.followers.EncoderFollower;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 
@@ -32,14 +39,37 @@ public class Robot extends TimedRobot {
   WPI_VictorSPX BL = new WPI_VictorSPX(2);
   WPI_VictorSPX FR = new WPI_VictorSPX(3);
   WPI_VictorSPX BR = new WPI_VictorSPX(4);
+  SpeedControllerGroup left = new SpeedControllerGroup(FL, BL);
+  SpeedControllerGroup right = new SpeedControllerGroup(FR, BR);
 
   MecanumDrive drive = new MecanumDrive(FL, BL, FR, BR);
+
+  AHRS gyro = new AHRS(SPI.Port.kMXP);
 
   private static final String kDefaultAuto = "Default";
   private static final String kCustomAuto = "My Auto";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
+
+  private static final int k_ticks_per_rev = 252;
+  private static final double k_wheel_diameter = 0.5;
+  private static final double k_max_velocity = 10;
+
+  private static final int k_left_encoder_port_a = 0;
+  private static final int k_left_encoder_port_b = 1;
+  private static final int k_right_encoder_port_a = 2;
+  private static final int k_right_encoder_port_b = 3;
+  Encoder m_left_encoder = new Encoder(k_left_encoder_port_a, k_left_encoder_port_b);
+  Encoder m_right_encoder = new Encoder(k_right_encoder_port_a, k_right_encoder_port_b);
+  private static final String k_path_name = "testPath";
+
+  Trajectory left_trajectory = PathfinderFRC.getTrajectory(k_path_name + ".left");
+  Trajectory right_trajectory = PathfinderFRC.getTrajectory(k_path_name + ".right");
+
+  EncoderFollower m_left_follower = new EncoderFollower(left_trajectory);
+  EncoderFollower m_right_follower = new EncoderFollower(right_trajectory);
+  Notifier m_follower_notifier = new Notifier(this::followPath);
   /**
    * This function is run when the robot is first started up and should be
    * used for any initialization code.
@@ -76,6 +106,18 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
+
+
+    m_left_follower.configureEncoder(m_left_encoder.get(), k_ticks_per_rev, k_wheel_diameter);
+    // You must tune the PID values on the following line!
+    m_left_follower.configurePIDVA(1.0, 0.0, 0.0, 1 / k_max_velocity, 0);
+
+    m_right_follower.configureEncoder(m_right_encoder.get(), k_ticks_per_rev, k_wheel_diameter);
+    // You must tune the PID values on the following line!
+    m_right_follower.configurePIDVA(1.0, 0.0, 0.0, 1 / k_max_velocity, 0);
+    
+    m_follower_notifier.startPeriodic(left_trajectory.get(0).dt);
+
     m_autoSelected = m_chooser.getSelected();
     // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
     System.out.println("Auto selected: " + m_autoSelected);
@@ -113,6 +155,22 @@ public class Robot extends TimedRobot {
 
     drive.driveCartesian(x, y, rotate);
   }
+
+  private void followPath() {
+    if (m_left_follower.isFinished() || m_right_follower.isFinished()) {
+      m_follower_notifier.stop();
+    } else {
+      double left_speed = m_left_follower.calculate(m_left_encoder.get());
+      double right_speed = m_right_follower.calculate(m_right_encoder.get());
+      double heading = gyro.getAngle();
+      double desired_heading = Pathfinder.r2d(m_left_follower.getHeading());
+      double heading_difference = Pathfinder.boundHalfDegrees(desired_heading - heading);
+      double turn =  0.8 * (-1.0/80.0) * heading_difference;
+      left.set(left_speed + turn);
+      right.set(right_speed - turn);
+    }
+  }
+
 
   /**
    * This function is called periodically during test mode.
