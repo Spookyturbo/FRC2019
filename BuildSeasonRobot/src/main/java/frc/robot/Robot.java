@@ -86,8 +86,8 @@ private static final int k_ticks_per_rev = 1024;
   
   Encoder enc = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
   Encoder sampleEncoder = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
-  Encoder m_left_follower = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
-  Encoder m_right_follower = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
+  EncoderFollower m_left_follower = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
+  EncoderFollower m_right_follower = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
   
 
   @Override
@@ -134,6 +134,12 @@ private static final int k_ticks_per_rev = 1024;
 
   @Override
   public void teleopPeriodic() {
+
+    m_follower_notifier.stop();
+    Bleftmotor.set(0);
+    Frightmotor.set(0);
+    Fleftmotor.set(0);
+    Brightmotor.set(0);
 
     if  (sampleEncoder.get ()<20 ) {
        drive.driveCartesian(10, 0, 0);
