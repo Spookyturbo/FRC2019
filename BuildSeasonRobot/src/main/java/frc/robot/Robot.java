@@ -66,7 +66,6 @@ private static final int k_ticks_per_rev = 1024;
 
     enc  = new Encoder(k_left_encoder_port_a, k_left_encoder_port_b);
     sampleEncoder = new Encoder(k_right_encoder_port_a, k_right_encoder_port_b);
-    m_gyro = new AnalogGyro(k_gyro_port);
 
       sampleEncoder.setMaxPeriod(.1);
   sampleEncoder.setMinRate(10);
@@ -80,14 +79,37 @@ private static final int k_ticks_per_rev = 1024;
 
   @Override
   public void robotPeriodic() {
+
+
+
   }
   
   Encoder enc = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
   Encoder sampleEncoder = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
+  Encoder m_left_follower = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
+  Encoder m_right_follower = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
   
 
   @Override
   public void autonomousInit() {
+
+    Trajectory left_trajectory = PathfinderFRC.getTrajectory(k_path_name + ".left");
+    Trajectory right_trajectory = PathfinderFRC.getTrajectory(k_path_name + ".right");
+
+    m_left_follower = new EncoderFollower(left_trajectory);
+    m_right_follower = new EncoderFollower(right_trajectory);
+
+    m_left_follower.configureEncoder(m_left_encoder.get(), k_ticks_per_rev, k_wheel_diameter);
+    // You must tune the PID values on the following line!
+    m_left_follower.configurePIDVA(1.0, 0.0, 0.0, 1 / k_max_velocity, 0);
+
+    m_right_follower.configureEncoder(m_right_encoder.get(), k_ticks_per_rev, k_wheel_diameter);
+    // You must tune the PID values on the following line!
+    m_right_follower.configurePIDVA(1.0, 0.0, 0.0, 1 / k_max_velocity, 0);
+    
+    m_follower_notifier = new Notifier(this::followPath);
+    m_follower_notifier.startPeriodic(left_trajectory.get(0).dt);
+
     m_autoSelected = m_chooser.getSelected();
     double distance = sampleEncoder.getRaw();
     
