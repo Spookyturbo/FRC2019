@@ -46,6 +46,8 @@ private static final int k_ticks_per_rev = 1024;
 
   private static final String k_path_name = PATH1;
   
+  
+
   private static final String kDefaultAuto = "Default";
   private static final String kCustomAuto = "My Auto";
   private String m_autoSelected;
@@ -61,6 +63,11 @@ private static final int k_ticks_per_rev = 1024;
    */
   @Override
   public void robotInit() {
+
+    enc  = new Encoder(k_left_encoder_port_a, k_left_encoder_port_b);
+    sampleEncoder = new Encoder(k_right_encoder_port_a, k_right_encoder_port_b);
+    m_gyro = new AnalogGyro(k_gyro_port);
+
       sampleEncoder.setMaxPeriod(.1);
   sampleEncoder.setMinRate(10);
   sampleEncoder.setDistancePerPulse(5);
@@ -77,7 +84,7 @@ private static final int k_ticks_per_rev = 1024;
   
   Encoder enc = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
   Encoder sampleEncoder = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
-
+  
 
   @Override
   public void autonomousInit() {
