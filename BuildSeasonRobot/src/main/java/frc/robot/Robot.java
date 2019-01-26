@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
 /**
@@ -41,7 +42,7 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     sampleEncoder.setMaxPeriod(.1);
     sampleEncoder.setMinRate(10);
-    sampleEncoder.setDistancePerPulse(5);
+    sampleEncoder.setDistancePerPulse((0.5f * Math.PI) / 1026f);
     sampleEncoder.setReverseDirection(true);
     sampleEncoder.setSamplesToAverage(7);
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
@@ -59,10 +60,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    m_autoSelected = m_chooser.getSelected();
-    double distance = sampleEncoder.getRaw();
-
-    System.out.println("Auto selected: " + m_autoSelected);
+    sampleEncoder.reset();
   }
 
   /**
@@ -70,20 +68,17 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousPeriodic() {
-    switch (m_autoSelected) {
-    case kCustomAuto:
+  }
 
-      break;
-    case kDefaultAuto:
-    default:
-
-      break;
-    }
+  @Override
+  public void teleopInit() {
+    sampleEncoder.reset();
   }
 
   @Override
   public void teleopPeriodic() {
     System.out.println(sampleEncoder.getRaw());
+    SmartDashboard.putNumber("Encoder", sampleEncoder.getRaw());
   }
 
   /**
@@ -91,5 +86,6 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void testPeriodic() {
+    drive.driveCartesian(0, 0.5f, 0);
   }
 }
