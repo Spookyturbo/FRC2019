@@ -62,7 +62,7 @@ public class Robot extends TimedRobot {
   private static final int k_right_encoder_port_b = 3;
   Encoder m_left_encoder = new Encoder(k_left_encoder_port_a, k_left_encoder_port_b);
   Encoder m_right_encoder = new Encoder(k_right_encoder_port_a, k_right_encoder_port_b);
-  private static final String k_path_name = "testPath";
+  private static final String k_path_name = "TestPath";
 
   Trajectory left_trajectory = PathfinderFRC.getTrajectory(k_path_name + ".left");
   Trajectory right_trajectory = PathfinderFRC.getTrajectory(k_path_name + ".right");
@@ -177,5 +177,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void testPeriodic() {
+    m_follower_notifier.stop();
+    left.set(0);
+    right.set(0);
   }
 }
