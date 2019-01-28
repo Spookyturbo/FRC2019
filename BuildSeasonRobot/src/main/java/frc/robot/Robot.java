@@ -40,11 +40,12 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
-    sampleEncoder.setMaxPeriod(.1);
-    sampleEncoder.setMinRate(10);
-    sampleEncoder.setDistancePerPulse((0.5f * Math.PI) / 1026f);
-    sampleEncoder.setReverseDirection(true);
-    sampleEncoder.setSamplesToAverage(7);
+    // sampleEncoder.setMaxPeriod(.1);
+    // sampleEncoder.setMinRate(10);
+    sampleEncoder.setDistancePerPulse(((0.5f * Math.PI) / 1026f) * 4);
+    // sampleEncoder.setReverseDirection(true);
+    // sampleEncoder.setSamplesToAverage(7);
+
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
@@ -75,6 +76,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousPeriodic() {
+    SmartDashboard.putNumber("Encoder", sampleEncoder.get());
   }
 
   @Override
@@ -84,12 +86,25 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    System.out.println(sampleEncoder.getRaw());
+    System.out.println(sampleEncoder.getDistance());
     SmartDashboard.putNumber("Encoder", sampleEncoder.getRaw());
     
     double y = -xbox.getY(Hand.kLeft);
     double x = xbox.getX(Hand.kLeft);
     double rotate = xbox.getX(Hand.kRight);
+
+    if(Math.abs(y) < 0.05f)
+      y = 0;
+
+    if(Math.abs(x) < 0.05f)
+      x = 0;
+
+    if(Math.abs(rotate) < 0.05f)
+      rotate = 0;
+
+    SmartDashboard.putNumber("Y", y);
+    SmartDashboard.putNumber("X", x);
+    SmartDashboard.putNumber("Rotate", rotate);
 
     drive.driveCartesian(x, y, rotate);
   }
@@ -99,6 +114,6 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void testPeriodic() {
-    drive.driveCartesian(0, 0.5f, 0);
+    drive.driveCartesian(0, 1f, 0);
   }
 }
