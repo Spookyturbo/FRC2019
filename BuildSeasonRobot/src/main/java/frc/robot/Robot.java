@@ -6,9 +6,14 @@
 /*----------------------------------------------------------------------------*/
 
 package frc.robot;
+<<<<<<< HEAD
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.AnalogGyro;
+=======
+
+import edu.wpi.first.wpilibj.drive.MecanumDrive;
+>>>>>>> 52c607cdbbb34bf3b6376fad68ac6a46eedbbef8
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.Spark;
@@ -22,7 +27,11 @@ import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
+<<<<<<< HEAD
 import com.kauailabs.navx.frc.AHRS;;
+=======
+
+>>>>>>> 52c607cdbbb34bf3b6376fad68ac6a46eedbbef8
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the TimedRobot
@@ -57,16 +66,18 @@ private static final int k_ticks_per_rev = 1024;
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
   WPI_VictorSPX Fleftmotor = new WPI_VictorSPX(1);
-   WPI_VictorSPX Brightmotor = new WPI_VictorSPX(1);
-   WPI_VictorSPX Frightmotor = new WPI_VictorSPX(1);
-   WPI_VictorSPX Bleftmotor = new WPI_VictorSPX(1);
-   MecanumDrive drive = new MecanumDrive(Fleftmotor, Brightmotor, Frightmotor, Bleftmotor);
+  WPI_VictorSPX Brightmotor = new WPI_VictorSPX(4);
+  WPI_VictorSPX Frightmotor = new WPI_VictorSPX(3);
+  WPI_VictorSPX Bleftmotor = new WPI_VictorSPX(2);
+  MecanumDrive drive = new MecanumDrive(Fleftmotor, Brightmotor, Frightmotor, Bleftmotor);
+
   /**
-   * This function is run when the robot is first started up and should be
-   * used for any initialization code.
+   * This function is run when the robot is first started up and should be used
+   * for any initialization code.
    */
   @Override
   public void robotInit() {
+<<<<<<< HEAD
     
     
 
@@ -78,6 +89,13 @@ private static final int k_ticks_per_rev = 1024;
   sampleEncoder.setDistancePerPulse(5);
   sampleEncoder.setReverseDirection(true);
   sampleEncoder.setSamplesToAverage(7);
+=======
+    sampleEncoder.setMaxPeriod(.1);
+    sampleEncoder.setMinRate(10);
+    sampleEncoder.setDistancePerPulse(5);
+    sampleEncoder.setReverseDirection(true);
+    sampleEncoder.setSamplesToAverage(7);
+>>>>>>> 52c607cdbbb34bf3b6376fad68ac6a46eedbbef8
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
@@ -108,12 +126,17 @@ private static final int k_ticks_per_rev = 1024;
 
 
   }
+<<<<<<< HEAD
   
   Encoder enc = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
   Encoder sampleEncoder = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
   EncoderFollower m_left_follower;
   EncoderFollower m_right_follower;
   
+=======
+
+  Encoder sampleEncoder = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
+>>>>>>> 52c607cdbbb34bf3b6376fad68ac6a46eedbbef8
 
   @Override
   public void autonomousInit() {
@@ -137,7 +160,7 @@ private static final int k_ticks_per_rev = 1024;
 
     m_autoSelected = m_chooser.getSelected();
     double distance = sampleEncoder.getRaw();
-    
+
     System.out.println("Auto selected: " + m_autoSelected);
   }
 
@@ -147,19 +170,20 @@ private static final int k_ticks_per_rev = 1024;
   @Override
   public void autonomousPeriodic() {
     switch (m_autoSelected) {
-      case kCustomAuto:
+    case kCustomAuto:
 
-        break;
-      case kDefaultAuto:
-      default:
-      
-        break;
+      break;
+    case kDefaultAuto:
+    default:
+
+      break;
     }
   }
 
   @Override
   public void teleopPeriodic() {
 
+<<<<<<< HEAD
     m_follower_notifier.stop();
     Bleftmotor.set(0);
     Frightmotor.set(0);
@@ -168,10 +192,15 @@ private static final int k_ticks_per_rev = 1024;
 
     if  (sampleEncoder.get ()<20 ) {
        drive.driveCartesian(10, 0, 0);
+=======
+    if (sampleEncoder.get() < 1000) {
+      drive.driveCartesian(10, 0, 0);
+>>>>>>> 52c607cdbbb34bf3b6376fad68ac6a46eedbbef8
     }
     int count = sampleEncoder.get();
-    System.out.println ("count"+count);
+    System.out.println("count" + count);
   }
+
   /**
    * This function is called periodically during test mode.
    */
