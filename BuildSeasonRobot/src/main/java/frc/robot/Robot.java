@@ -62,10 +62,10 @@ public class Robot extends TimedRobot {
   private static final int k_right_encoder_port_b = 3;
   Encoder m_left_encoder = new Encoder(k_left_encoder_port_a, k_left_encoder_port_b);
   Encoder m_right_encoder = new Encoder(k_right_encoder_port_a, k_right_encoder_port_b);
-  private static final String k_path_name = "TestPath";
+  private static final String k_path_name = "TinyPath";
 
-  Trajectory left_trajectory = PathfinderFRC.getTrajectory(k_path_name + ".left");
-  Trajectory right_trajectory = PathfinderFRC.getTrajectory(k_path_name + ".right");
+  Trajectory left_trajectory = PathfinderFRC.getTrajectory(k_path_name + ".right");
+  Trajectory right_trajectory = PathfinderFRC.getTrajectory(k_path_name + ".left");
 
   EncoderFollower m_left_follower = new EncoderFollower(left_trajectory);
   EncoderFollower m_right_follower = new EncoderFollower(right_trajectory);
@@ -79,6 +79,8 @@ public class Robot extends TimedRobot {
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
+    right.setInverted(true);
+    m_right_encoder.setReverseDirection(true);
   }
 
   /**
