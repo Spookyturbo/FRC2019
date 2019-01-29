@@ -76,8 +76,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
-    m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
-    m_chooser.addOption("My Auto", kCustomAuto);
+    m_chooser.setDefaultOption("TestPath", "TestPath");
+    m_chooser.addOption("TinyPath", "TinyPath");
     SmartDashboard.putData("Auto choices", m_chooser);
     right.setInverted(true);
     m_right_encoder.setReverseDirection(true);
@@ -109,6 +109,13 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
 
+    String path = m_chooser.getSelected();
+
+    left_trajectory = PathfinderFRC.getTrajectory(path + ".right");
+    right_trajectory = PathfinderFRC.getTrajectory(path + ".left");
+
+    m_left_follower.setTrajectory(left_trajectory);
+    m_right_follower.setTrajectory(right_trajectory);
 
     m_left_follower.configureEncoder(m_left_encoder.get(), k_ticks_per_rev, k_wheel_diameter);
     // You must tune the PID values on the following line!
@@ -143,7 +150,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    
+    //You are probably moving back into position to run the path again
+    m_left_follower.reset();
+    m_right_follower.reset();
   }
 
   /**
