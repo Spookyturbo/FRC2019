@@ -9,20 +9,17 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.autonomous.Pathweaver;
+
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.SPI;
-import jaci.pathfinder.Pathfinder;
-import jaci.pathfinder.PathfinderFRC;
-import jaci.pathfinder.Trajectory;
-import jaci.pathfinder.followers.EncoderFollower;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
+import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -39,6 +36,7 @@ public class Robot extends TimedRobot {
   WPI_VictorSPX BL = new WPI_VictorSPX(2);
   WPI_VictorSPX FR = new WPI_VictorSPX(3);
   WPI_VictorSPX BR = new WPI_VictorSPX(4);
+
   SpeedControllerGroup left = new SpeedControllerGroup(FL, BL);
   SpeedControllerGroup right = new SpeedControllerGroup(FR, BR);
 
@@ -46,41 +44,38 @@ public class Robot extends TimedRobot {
 
   AHRS gyro = new AHRS(SPI.Port.kMXP);
 
-  private static final String kDefaultAuto = "Default";
-  private static final String kCustomAuto = "My Auto";
-  private String m_autoSelected;
+  Encoder leftEncoder = new Encoder(0, 1);
+  Encoder rightEncoder = new Encoder(2, 3);
+
+  Pathweaver pathweaver = new Pathweaver(leftEncoder, rightEncoder, left, right, gyro);
+
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
-
-  private static final int k_ticks_per_rev = 252;
-  private static final double k_wheel_diameter = 0.5;
-  private static final double k_max_velocity = 10;
-
-  private static final int k_left_encoder_port_a = 0;
-  private static final int k_left_encoder_port_b = 1;
-  private static final int k_right_encoder_port_a = 2;
-  private static final int k_right_encoder_port_b = 3;
-  Encoder m_left_encoder = new Encoder(k_left_encoder_port_a, k_left_encoder_port_b);
-  Encoder m_right_encoder = new Encoder(k_right_encoder_port_a, k_right_encoder_port_b);
-  private static final String k_path_name = "TinyPath";
-
-  Trajectory left_trajectory = PathfinderFRC.getTrajectory(k_path_name + ".right");
-  Trajectory right_trajectory = PathfinderFRC.getTrajectory(k_path_name + ".left");
-
-  EncoderFollower m_left_follower = new EncoderFollower(left_trajectory);
-  EncoderFollower m_right_follower = new EncoderFollower(right_trajectory);
-  Notifier m_follower_notifier = new Notifier(this::followPath);
   /**
    * This function is run when the robot is first started up and should be
    * used for any initialization code.
    */
   @Override
   public void robotInit() {
+    gyro.reset();
+    leftEncoder.reset();
+    rightEncoder.reset();
+
     m_chooser.setDefaultOption("TestPath", "TestPath");
     m_chooser.addOption("TinyPath", "TinyPath");
+    m_chooser.addOption("Park", "Park");
     SmartDashboard.putData("Auto choices", m_chooser);
-    right.setInverted(true);
-    m_right_encoder.setReverseDirection(true);
+
+    rightEncoder.setName("Encoders", "Right Encoder");
+    leftEncoder.setName("Encoders", "Left Encoder");
+    gyro.setName("Angle", "Gyro");
+
+    LiveWindow.add(rightEncoder);
+    LiveWindow.add(leftEncoder);
+    LiveWindow.add(gyro);
+
+    SmartDashboard.putNumber("LeftEncoder", leftEncoder.get());
+    SmartDashboard.putNumber("RightEncoder", rightEncoder.get());
   }
 
   /**
@@ -108,28 +103,11 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
-
     String path = m_chooser.getSelected();
+    System.out.println(path);
 
-    left_trajectory = PathfinderFRC.getTrajectory(path + ".right");
-    right_trajectory = PathfinderFRC.getTrajectory(path + ".left");
-
-    m_left_follower.setTrajectory(left_trajectory);
-    m_right_follower.setTrajectory(right_trajectory);
-
-    m_left_follower.configureEncoder(m_left_encoder.get(), k_ticks_per_rev, k_wheel_diameter);
-    // You must tune the PID values on the following line!
-    m_left_follower.configurePIDVA(1.0, 0.0, 0.0, 1 / k_max_velocity, 0);
-
-    m_right_follower.configureEncoder(m_right_encoder.get(), k_ticks_per_rev, k_wheel_diameter);
-    // You must tune the PID values on the following line!
-    m_right_follower.configurePIDVA(1.0, 0.0, 0.0, 1 / k_max_velocity, 0);
-    
-    m_follower_notifier.startPeriodic(left_trajectory.get(0).dt);
-
-    m_autoSelected = m_chooser.getSelected();
-    // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
-    System.out.println("Auto selected: " + m_autoSelected);
+    pathweaver.setPath(path);
+    pathweaver.start();
   }
 
   /**
@@ -137,22 +115,12 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousPeriodic() {
-    switch (m_autoSelected) {
-      case kCustomAuto:
-        // Put custom auto code here
-        break;
-      case kDefaultAuto:
-      default:
-        // Put default auto code here
-        break;
-    }
+
   }
 
   @Override
   public void teleopInit() {
-    //You are probably moving back into position to run the path again
-    m_left_follower.reset();
-    m_right_follower.reset();
+    pathweaver.stop();
   }
 
   /**
@@ -160,6 +128,9 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
+    SmartDashboard.putNumber("LeftEncoder", leftEncoder.get());
+    SmartDashboard.putNumber("RightEncoder", rightEncoder.get());
+
     double y = -xBox.getRawAxis(1);
     double x = xBox.getRawAxis(0);
     double rotate = xBox.getRawAxis(4);
@@ -167,28 +138,12 @@ public class Robot extends TimedRobot {
     drive.driveCartesian(x, y, rotate);
   }
 
-  private void followPath() {
-    if (m_left_follower.isFinished() || m_right_follower.isFinished()) {
-      m_follower_notifier.stop();
-    } else {
-      double left_speed = m_left_follower.calculate(m_left_encoder.get());
-      double right_speed = m_right_follower.calculate(m_right_encoder.get());
-      double heading = gyro.getAngle();
-      double desired_heading = Pathfinder.r2d(m_left_follower.getHeading());
-      double heading_difference = Pathfinder.boundHalfDegrees(desired_heading - heading);
-      double turn =  0.8 * (-1.0/80.0) * heading_difference;
-      left.set(left_speed + turn);
-      right.set(right_speed - turn);
-    }
-  }
-
-
   /**
    * This function is called periodically during test mode.
    */
   @Override
   public void testPeriodic() {
-    m_follower_notifier.stop();
+    pathweaver.stop();
     left.set(0);
     right.set(0);
   }
