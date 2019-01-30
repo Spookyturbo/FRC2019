@@ -6,7 +6,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
+import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.SPI;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
@@ -22,9 +24,14 @@ public class Robot extends TimedRobot {
   WPI_VictorSPX FR = new WPI_VictorSPX(RobotMap.Motors.FRDrive);
   WPI_VictorSPX BR = new WPI_VictorSPX(RobotMap.Motors.BRDrive);
 
+  WPI_VictorSPX intake = new WPI_VictorSPX(RobotMap.Motors.intake);
+
   MecanumDrive drive = new MecanumDrive(FL, BL, FR, BR);
 
-  AHRS gyro;
+  AHRS gyro = new AHRS(SPI.Port.kMXP);
+
+  Encoder leftEncoder = new Encoder(0, 1);
+  Encoder rightEncoder = new Encoder(2, 3);
 
   private static final String kDefaultAuto = "Default";
   private static final String kCustomAuto = "My Auto";
@@ -41,12 +48,11 @@ public class Robot extends TimedRobot {
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
 
-    //If the gyro is not plugged in this can throw an error, make sure it doesn't crash the robot
-    try {
-      gyro = new AHRS(SPI.Port.kMXP);
-    } catch (RuntimeException e) { 
-      DriverStation.reportError("Error instantiating navX MXP:  " + e.getMessage(), true); 
-    }
+    leftEncoder.setName("Encoders", "Left");
+    rightEncoder.setName("Encoders", "Right");
+
+    LiveWindow.add(leftEncoder);
+    LiveWindow.add(rightEncoder);
   }
 
   /**
@@ -86,7 +92,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    
+    gyro.reset();
   }
 
   /**
@@ -99,6 +105,16 @@ public class Robot extends TimedRobot {
     double rotate = xbox.getX(Hand.kRight);
 
     drive.driveCartesian(x, y, rotate);
+    
+    if(xbox.getBumper(Hand.kLeft)) {
+      intake.set(1f);
+    }
+    else if(xbox.getBumper(Hand.kRight)) {
+      intake.set(-1f);
+    }
+    else {
+      intake.set(0);
+    }
   }
 
   /**
