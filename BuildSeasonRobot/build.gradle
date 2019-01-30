@@ -61,8 +61,7 @@ jar {
 }
 
 task copyFiles(type: Copy) {
-    copy {
-        from('PathWeaver/output')
-        into 'src/main/deploy/paths'
-    }
+    description 'Copies PathWeaver/output into deploy/paths'
+    from 'PathWeaver/output'
+    into 'src/main/deploy/paths'
 }
