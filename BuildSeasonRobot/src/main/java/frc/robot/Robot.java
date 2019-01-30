@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.autonomous.Pathweaver;
 
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.SPI;
@@ -55,15 +56,21 @@ public class Robot extends TimedRobot {
    * This function is run when the robot is first started up and should be
    * used for any initialization code.
    */
+  NeutralMode motorMode = NeutralMode.Brake;
   @Override
   public void robotInit() {
+    FL.setNeutralMode(motorMode);
+    BL.setNeutralMode(motorMode);
+    FR.setNeutralMode(motorMode);
+    BR.setNeutralMode(motorMode);
+
     gyro.reset();
     leftEncoder.reset();
     rightEncoder.reset();
 
-    m_chooser.setDefaultOption("TestPath", "TestPath");
-    m_chooser.addOption("TinyPath", "TinyPath");
-    m_chooser.addOption("Park", "Park");
+    m_chooser.setDefaultOption("Forward", "Forward");
+    m_chooser.addOption("ForwardLeft", "ForwardLeft");
+    m_chooser.addOption("ForwardRight", "FowardRight");
     SmartDashboard.putData("Auto choices", m_chooser);
 
     rightEncoder.setName("Encoders", "Right Encoder");
@@ -115,11 +122,14 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousPeriodic() {
-
+    SmartDashboard.putNumber("LeftEncoder", leftEncoder.get());
+    SmartDashboard.putNumber("RightEncoder", rightEncoder.get());
   }
 
   @Override
   public void teleopInit() {
+    leftEncoder.reset();
+    rightEncoder.reset();
     pathweaver.stop();
   }
 

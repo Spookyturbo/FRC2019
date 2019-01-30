@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import jaci.pathfinder.Pathfinder;
 import jaci.pathfinder.PathfinderFRC;
 import jaci.pathfinder.Trajectory;
@@ -41,24 +42,25 @@ public class Pathweaver {
     private SpeedControllerGroup rightMotors;
 
     private final double kWheelDiameter = 0.5;
-    private final int kLeftTicksPerRev = 252;
-    private final int kRightTicksPerRev = 172;
+    private final int kLeftTicksPerRev = 257; //264, 251, 257
+    private final int kRightTicksPerRev = 171; //170, 172, 171
     private final double kMaxVelocity = 10f;
+    private final double kMaxDesiredVelocity = 5f;
 
     //Speedcontroller group
     public Pathweaver(Encoder leftEncoder, Encoder rightEncoder, SpeedControllerGroup leftMotors, SpeedControllerGroup rightMotors, AHRS gyro) {
-        init(leftEncoder, rightEncoder, gyro);
-
         this.leftMotors = leftMotors;
         this.rightMotors = rightMotors;
+
+        init(leftEncoder, rightEncoder, gyro);
     }
 
     //Individual Speed Controller
     public Pathweaver(Encoder leftEncoder, Encoder rightEncoder, SpeedController leftMotor, SpeedController rightMotor, AHRS Gyro) {
-        init(leftEncoder, rightEncoder, gyro);
-
         leftMotors = new SpeedControllerGroup(leftMotor, leftMotor);
         rightMotors = new SpeedControllerGroup(rightMotor, rightMotor);
+
+        init(leftEncoder, rightEncoder, gyro);
     }
 
     private void init(Encoder leftEncoder, Encoder rightEncoder, AHRS gyro) {
@@ -73,6 +75,12 @@ public class Pathweaver {
         //These need tuned
         leftEncoderFollower.configurePIDVA(1.0, 0.0, 0.0, 1 / kMaxVelocity, 0);
         rightEncoderFollower.configurePIDVA(1.0, 0.0, 0.0, 1 / kMaxVelocity, 0);
+
+        SmartDashboard.putNumber("leftP", 1);
+        SmartDashboard.putNumber("rightP", 1);
+
+        SmartDashboard.putNumber("leftD", 0);
+        SmartDashboard.putNumber("rightD", 0);
     }
 
     public void setPath(String pathName) {
@@ -80,6 +88,9 @@ public class Pathweaver {
         leftTrajectory = PathfinderFRC.getTrajectory(pathName + ".right");
         rightTrajectory = PathfinderFRC.getTrajectory(pathName + ".left");
 
+        leftEncoderFollower.configurePIDVA(SmartDashboard.getNumber("leftP", 1), 0.0, SmartDashboard.getNumber("leftD", 0), 1 / kMaxVelocity, 0);
+        rightEncoderFollower.configurePIDVA(SmartDashboard.getNumber("rightP", 1), 0.0, SmartDashboard.getNumber("rightD", 0), 1 / kMaxVelocity, 0);
+        
         leftEncoderFollower.setTrajectory(leftTrajectory);
         rightEncoderFollower.setTrajectory(rightTrajectory);
     }
@@ -99,11 +110,14 @@ public class Pathweaver {
     private void followPath() {
         if (leftEncoderFollower.isFinished() || rightEncoderFollower.isFinished()) {
             followerNotifier.stop();
+            System.out.println("Left: " + leftEncoderFollower.isFinished() + " Right: " + rightEncoderFollower.isFinished());
         } else {
             double left_speed = leftEncoderFollower.calculate(leftEncoder.get());
             double right_speed = rightEncoderFollower.calculate(rightEncoder.get());
+            left_speed *= (kMaxDesiredVelocity / kMaxVelocity);
+            right_speed *= (kMaxDesiredVelocity / kMaxVelocity);
             double heading = gyro.getAngle();
-            double desired_heading = Pathfinder.r2d(leftEncoderFollower.getHeading());
+            double desired_heading = -Pathfinder.r2d(leftEncoderFollower.getHeading());
             double heading_difference = Pathfinder.boundHalfDegrees(desired_heading - heading);
             double turn = 0.8 * (-1.0 / 80.0) * heading_difference;
             leftMotors.set(left_speed + turn);
