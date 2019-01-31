@@ -44,7 +44,8 @@ public class Pathweaver {
     private final double kWheelDiameter = 0.5;
     private final int kLeftTicksPerRev = 257; //264, 251, 257
     private final int kRightTicksPerRev = 171; //170, 172, 171
-    private final double kMaxVelocity = 10f;
+    private final double kMaxLeftVelocity = 8f;
+    private final double kMaxRightVelocity = 9f;
     private final double kMaxDesiredVelocity = 5f;
 
     //Speedcontroller group
@@ -73,8 +74,8 @@ public class Pathweaver {
         rightEncoder.setReverseDirection(true);
 
         //These need tuned
-        leftEncoderFollower.configurePIDVA(1.0, 0.0, 0.0, 1 / kMaxVelocity, 0);
-        rightEncoderFollower.configurePIDVA(1.0, 0.0, 0.0, 1 / kMaxVelocity, 0);
+        leftEncoderFollower.configurePIDVA(1.0, 0.0, 0.0, 1 / kMaxLeftVelocity, 0);
+        rightEncoderFollower.configurePIDVA(1.0, 0.0, 0.0, 1 / kMaxRightVelocity, 0);
 
         SmartDashboard.putNumber("leftP", 1);
         SmartDashboard.putNumber("rightP", 1);
@@ -88,8 +89,8 @@ public class Pathweaver {
         leftTrajectory = PathfinderFRC.getTrajectory(pathName + ".right");
         rightTrajectory = PathfinderFRC.getTrajectory(pathName + ".left");
 
-        leftEncoderFollower.configurePIDVA(SmartDashboard.getNumber("leftP", 1), 0.0, SmartDashboard.getNumber("leftD", 0), 1 / kMaxVelocity, 0);
-        rightEncoderFollower.configurePIDVA(SmartDashboard.getNumber("rightP", 1), 0.0, SmartDashboard.getNumber("rightD", 0), 1 / kMaxVelocity, 0);
+        leftEncoderFollower.configurePIDVA(SmartDashboard.getNumber("leftP", 1), 0.0, SmartDashboard.getNumber("leftD", 0), 1 / kMaxLeftVelocity, 0);
+        rightEncoderFollower.configurePIDVA(SmartDashboard.getNumber("rightP", 1), 0.0, SmartDashboard.getNumber("rightD", 0), 1 / kMaxRightVelocity, 0);
         
         leftEncoderFollower.setTrajectory(leftTrajectory);
         rightEncoderFollower.setTrajectory(rightTrajectory);
@@ -114,14 +115,17 @@ public class Pathweaver {
         } else {
             double left_speed = leftEncoderFollower.calculate(leftEncoder.get());
             double right_speed = rightEncoderFollower.calculate(rightEncoder.get());
-            left_speed *= (kMaxDesiredVelocity / kMaxVelocity);
-            right_speed *= (kMaxDesiredVelocity / kMaxVelocity);
+            left_speed *= (kMaxDesiredVelocity / kMaxLeftVelocity);
+            right_speed *= (kMaxDesiredVelocity / kMaxRightVelocity);
             double heading = gyro.getAngle();
-            double desired_heading = -Pathfinder.r2d(leftEncoderFollower.getHeading());
+            SmartDashboard.putNumber("Gyro", heading);
+            double desired_heading = Pathfinder.r2d(leftEncoderFollower.getHeading());
+            SmartDashboard.putNumber("DesiredHeading", desired_heading);
             double heading_difference = Pathfinder.boundHalfDegrees(desired_heading - heading);
-            double turn = 0.8 * (-1.0 / 80.0) * heading_difference;
-            leftMotors.set(left_speed + turn);
-            rightMotors.set(right_speed - turn);
+            SmartDashboard.putNumber("HeadingDifference", heading_difference);
+            double turn = 2 * (-1.0 / 80.0) * heading_difference;
+            leftMotors.set(left_speed - turn); //+turn
+            rightMotors.set(right_speed + turn);//-turn
         }
     }
 

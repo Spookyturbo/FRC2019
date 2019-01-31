@@ -64,6 +64,9 @@ public class Robot extends TimedRobot {
     FR.setNeutralMode(motorMode);
     BR.setNeutralMode(motorMode);
 
+    leftEncoder.setDistancePerPulse((0.5f * Math.PI) / 257);
+    rightEncoder.setDistancePerPulse((0.5f * Math.PI) / 171);
+
     gyro.reset();
     leftEncoder.reset();
     rightEncoder.reset();
@@ -71,6 +74,7 @@ public class Robot extends TimedRobot {
     m_chooser.setDefaultOption("Forward", "Forward");
     m_chooser.addOption("ForwardLeft", "ForwardLeft");
     m_chooser.addOption("ForwardRight", "FowardRight");
+    m_chooser.addOption("Tower", "Tower");
     SmartDashboard.putData("Auto choices", m_chooser);
 
     rightEncoder.setName("Encoders", "Right Encoder");
