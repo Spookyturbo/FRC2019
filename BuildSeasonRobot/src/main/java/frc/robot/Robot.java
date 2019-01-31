@@ -9,6 +9,8 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -25,7 +27,7 @@ import edu.wpi.first.wpilibj.drive.MecanumDrive;
  * creating this project, you must also update the build.gradle file in the
  * project.
  */
-public class Robot extends TimedRobot {
+public class Robot extends TimedRobot implements PIDOutput{
   //Xbox Control
   Joystick xBox = new Joystick(0);
 
@@ -37,6 +39,9 @@ public class Robot extends TimedRobot {
   MecanumDrive drive = new MecanumDrive(FL, BL, FR, BR);
 
   AnalogInput sonar = new AnalogInput(0);
+  PIDController sonarDistanceController = new PIDController(0.03, 0, 0.05, sonar, this);
+  double speed; 
+
 
   private static final String kDefaultAuto = "Default";
   private static final String kCustomAuto = "My Auto";
@@ -52,6 +57,14 @@ public class Robot extends TimedRobot {
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
+
+    sonarDistanceController.setInputRange(0, 5);
+    sonarDistanceController.setOutputRange(-0.5, 0.5);
+    sonarDistanceController.setAbsoluteTolerance(5);
+    sonarDistanceController.setContinuous(false);
+    sonarDistanceController.setSetpoint(30*(5/1024));
+    sonarDistanceController.enable();
+ 
   }
 
   /**
@@ -106,23 +119,34 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     double coolData;
-double storedData = sonar.getVoltage(); 
+double storedData = sonar.getAverageVoltage(); 
 coolData = (storedData/(5f/1024f)); 
-coolData/=2.54;
-System.out.println (coolData);
+
+System.out.print(storedData);
+coolData*=5;
+
+coolData/=25.4; 
+storedData = coolData; 
+storedData *= (25.4/5); 
+storedData *= (5/1024);
+  
+System.out.println(" "+ storedData);
+SmartDashboard.putNumber("sonar", coolData);
+   
+drive.driveCartesian(0, speed, 0);
 
 
-    double y = -xBox.getRawAxis(1);
-    double x = xBox.getRawAxis(0);
-    double rotate = xBox.getRawAxis(4);
-
-    drive.driveCartesian(x, y, rotate);
   }
-
-  /**
+    /**
    * This function is called periodically during test mode.
    */
   @Override
   public void testPeriodic() {
+  }
+
+  @Override
+  public void pidWrite(double output) {
+    speed = output; 
+
   }
 }
