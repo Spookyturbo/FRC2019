@@ -19,6 +19,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
+import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -39,7 +40,7 @@ public class Robot extends TimedRobot implements PIDOutput{
   MecanumDrive drive = new MecanumDrive(FL, BL, FR, BR);
 
   AnalogInput sonar = new AnalogInput(0);
-  PIDController sonarDistanceController = new PIDController(0.03, 0, 0.05, sonar, this);
+  PIDController sonarDistanceController = new PIDController(1, 0, 0, sonar, this);
   double speed; 
 
 
@@ -54,17 +55,24 @@ public class Robot extends TimedRobot implements PIDOutput{
    */
   @Override
   public void robotInit() {
+    double desiredVoltage = 30f*(25.4f/1024f);
+    double desiredDistance = desiredVoltage / (5f/1024f);
+    desiredDistance *= 5;
+    desiredDistance /= 25.4;
+    SmartDashboard.putNumber("DesiredOutput", desiredDistance);
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
 
     sonarDistanceController.setInputRange(0, 5);
     sonarDistanceController.setOutputRange(-0.5, 0.5);
-    sonarDistanceController.setAbsoluteTolerance(5);
+    sonarDistanceController.setAbsoluteTolerance(5f*(25.4f/1024f));
     sonarDistanceController.setContinuous(false);
-    sonarDistanceController.setSetpoint(30*(5/1024));
+    sonarDistanceController.setSetpoint(30f*(25.4f/1024f));
     sonarDistanceController.enable();
- 
+    
+    sonarDistanceController.setName("PID", "Sonar");
+    LiveWindow.add(sonarDistanceController);
   }
 
   /**
@@ -113,6 +121,11 @@ public class Robot extends TimedRobot implements PIDOutput{
     }
   }
 
+  @Override
+  public void teleopInit() {
+    sonarDistanceController.enable();
+  }
+
   /**
    * This function is called periodically during operator control.
    */
@@ -123,17 +136,17 @@ double storedData = sonar.getAverageVoltage();
 coolData = (storedData/(5f/1024f)); 
 
 System.out.print(storedData);
-coolData*=5;
+coolData*=5f;
 
 coolData/=25.4; 
 storedData = coolData; 
-storedData *= (25.4/5); 
-storedData *= (5/1024);
-  
+storedData *= (25.4/5f); 
+storedData *= (5f/1024f);
+
 System.out.println(" "+ storedData);
 SmartDashboard.putNumber("sonar", coolData);
    
-drive.driveCartesian(0, speed, 0);
+drive.driveCartesian(0, -speed, 0);
 
 
   }
@@ -142,6 +155,8 @@ drive.driveCartesian(0, speed, 0);
    */
   @Override
   public void testPeriodic() {
+    sonarDistanceController.disable();
+    drive.stopMotor();
   }
 
   @Override
