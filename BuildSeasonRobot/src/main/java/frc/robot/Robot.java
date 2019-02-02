@@ -28,7 +28,7 @@ public class Robot extends TimedRobot {
 
   MecanumDrive drive = new MecanumDrive(FL, BL, FR, BR);
 
-  AHRS gyro = new AHRS(SPI.Port.kMXP);
+  AHRS gyro;
 
   Encoder leftEncoder = new Encoder(0, 1);
   Encoder rightEncoder = new Encoder(2, 3);
