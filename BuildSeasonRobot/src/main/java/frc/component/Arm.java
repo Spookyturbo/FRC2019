@@ -4,11 +4,26 @@
 /* must be accompanied by the FIRST BSD license file in the root directory of */
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
-
 package frc.component;
 
-/**
- * Add your docs here.
- */
-public class Arm {
+import frc.util.Component;
+
+//Implement component so that this can be included in the main loop
+public class Arm implements Component{
+
+    //Store a static instance and create it for the singleton pattern
+    private static Arm instance = new Arm();
+
+    private Arm() {
+        //Just here to remove the public constructor
+    }
+
+    @Override
+    public void execute() {
+        //Code ran every loop
+    }
+
+    public static Arm getInstance() {
+        return instance;
+    }
 }
