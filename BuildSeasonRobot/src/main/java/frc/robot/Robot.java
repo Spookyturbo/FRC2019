@@ -3,6 +3,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.component.Jacks;
 import frc.util.Component;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
@@ -12,12 +13,14 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.SPI;
 
+import java.util.ArrayList;
+
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
 import com.kauailabs.navx.frc.AHRS;
 
 public class Robot extends TimedRobot {
-  Component[] components;
+  ArrayList<Component> components = new ArrayList<>();
   //Xbox Control
   XboxController xbox = new XboxController(OI.Driver.port);
 
@@ -35,8 +38,6 @@ public class Robot extends TimedRobot {
   Encoder leftEncoder = new Encoder(0, 1);
   Encoder rightEncoder = new Encoder(2, 3);
 
-  private static final String kDefaultAuto = "Default";
-  private static final String kCustomAuto = "My Auto";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
@@ -46,8 +47,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
-    m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
-    m_chooser.addOption("My Auto", kCustomAuto);
+    components.add(Jacks.getInstance());
     SmartDashboard.putData("Auto choices", m_chooser);
 
     leftEncoder.setName("Encoders", "Left");
@@ -81,14 +81,14 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousPeriodic() {
-    for(int i = 0; i < components.length; i++) {
-      components[i].execute();
+    for(Component component : components) {
+      component.execute();
     }
   }
 
   @Override
   public void teleopInit() {
-    gyro.reset();
+    //gyro.reset();
   }
 
   /**
@@ -112,8 +112,8 @@ public class Robot extends TimedRobot {
     //   intake.set(0);
     // }
     //run all of our components
-    for(int i = 0; i < components.length; i++) {
-      components[i].execute();
+    for(Component component : components) {
+      component.execute();
     }
   }
 
