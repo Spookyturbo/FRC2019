@@ -3,8 +3,11 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.component.Arm;
 import frc.component.Drive;
+import frc.component.Intake;
 import frc.component.Jacks;
+import frc.component.Wrist;
 import frc.util.Component;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
@@ -39,6 +42,9 @@ public class Robot extends TimedRobot {
 
   Drive drive;
   Jacks jacks;
+  Intake intake;
+  Wrist wrist;
+  Arm arm;
 
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
@@ -48,11 +54,18 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
+    //Store in cleaner variables
     drive = Drive.getInstance();
     jacks = Jacks.getInstance();
+    intake = Intake.getInstance();
+    wrist = Wrist.getInstance();
+    arm = Arm.getInstance();
 
     components.add(drive);
     components.add(jacks);
+    components.add(intake);
+    components.add(wrist);
+    components.add(arm);
 
     SmartDashboard.putData("Auto choices", m_chooser);
 
@@ -91,9 +104,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousPeriodic() {
-    for(Component component : components) {
-      component.execute();
-    }
+    updateAllComponents();
   }
 
   @Override
@@ -112,10 +123,7 @@ public class Robot extends TimedRobot {
 
     drive.driveCartesian(x, y, rotate);
     
-    //run all of our components
-    for(Component component : components) {
-      component.execute();
-    }
+    updateAllComponents();
   }
     
 
@@ -126,6 +134,13 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void testPeriodic() {
+  }
+
+  public void updateAllComponents() {
+    //run all of our components
+    for(Component component : components) {
+      component.execute();
+    }
   }
 }
 
