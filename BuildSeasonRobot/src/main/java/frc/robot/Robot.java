@@ -24,7 +24,7 @@ public class Robot extends TimedRobot {
   WPI_VictorSPX FR = new WPI_VictorSPX(RobotMap.Motors.FRDrive);
   WPI_VictorSPX BR = new WPI_VictorSPX(RobotMap.Motors.BRDrive);
 
-  WPI_VictorSPX intake = new WPI_VictorSPX(RobotMap.Motors.intake);
+  //WPI_VictorSPX intake = new WPI_VictorSPX(RobotMap.Motors.intake);
 
   MecanumDrive drive = new MecanumDrive(FL, BL, FR, BR);
 
@@ -106,15 +106,15 @@ public class Robot extends TimedRobot {
 
     drive.driveCartesian(x, y, rotate);
     
-    if(xbox.getBumper(Hand.kLeft)) {
-      intake.set(1f);
-    }
-    else if(xbox.getBumper(Hand.kRight)) {
-      intake.set(-1f);
-    }
-    else {
-      intake.set(0);
-    }
+    // if(xbox.getBumper(Hand.kLeft)) {
+    //   intake.set(1f);
+    // }
+    // else if(xbox.getBumper(Hand.kRight)) {
+    //   intake.set(-1f);
+    // }
+    // else {
+    //   intake.set(0);
+    // }
   }
 
   /**
