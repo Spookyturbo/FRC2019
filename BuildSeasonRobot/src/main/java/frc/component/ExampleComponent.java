@@ -14,9 +14,15 @@ public class ExampleComponent implements Component{
 
     //Store a static instance and create it for the singleton pattern
     private static ExampleComponent instance = new ExampleComponent();
+    double mSpeed;
 
     private ExampleComponent() {
         //Just here to remove the public constructor
+    }
+
+    //Used to set the speed outside of this file
+    public void setSpeed(double speed) {
+        mSpeed = speed;
     }
 
     @Override

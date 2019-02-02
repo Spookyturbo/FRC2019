@@ -3,6 +3,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.util.Component;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
@@ -16,6 +17,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
 
 public class Robot extends TimedRobot {
+  Component[] components;
   //Xbox Control
   XboxController xbox = new XboxController(OI.Driver.port);
 
@@ -79,14 +81,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousPeriodic() {
-    switch (m_autoSelected) {
-      case kCustomAuto:
-        // Put custom auto code here
-        break;
-      case kDefaultAuto:
-      default:
-        // Put default auto code here
-        break;
+    for(int i = 0; i < components.length; i++) {
+      components[i].execute();
     }
   }
 
@@ -115,6 +111,10 @@ public class Robot extends TimedRobot {
     // else {
     //   intake.set(0);
     // }
+    //run all of our components
+    for(int i = 0; i < components.length; i++) {
+      components[i].execute();
+    }
   }
 
   /**
