@@ -18,6 +18,12 @@ public class Arm implements Component{
         //Just here to remove the public constructor
     }
 
+/*/
+public void print(String word){
+System.out.print(word);
+}
+/*/
+
     @Override
     public void execute() {
         //Code ran every loop
