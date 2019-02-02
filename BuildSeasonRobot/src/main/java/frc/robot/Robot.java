@@ -3,12 +3,14 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.component.Drive;
 import frc.component.Jacks;
 import frc.util.Component;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.SPI;
 
@@ -35,6 +37,9 @@ public class Robot extends TimedRobot {
   Encoder leftEncoder = new Encoder(0, 1);
   Encoder rightEncoder = new Encoder(2, 3);
 
+  Drive drive;
+  Jacks jacks;
+
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
   /**
@@ -43,6 +48,16 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
+    drive = Drive.getInstance();
+    jacks = Jacks.getInstance();
+
+    components.add(drive);
+    components.add(jacks);
+
+    SmartDashboard.putData("Auto choices", m_chooser);
+
+    leftEncoder.setName("Encoders", "Left");
+    rightEncoder.setName("Encoders", "Right");
 
     //If the gyro is not plugged in this can throw an error, make sure it doesn't crash the robot
     try {

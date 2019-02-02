@@ -14,7 +14,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 /**
  * Add your docs here.
  */
-public class Jacks implements Component{
+public class Jacks implements Component {
 
     WPI_VictorSPX J1 = new WPI_VictorSPX(RobotMap.Motors.J1Drive);
     WPI_VictorSPX J2 = new WPI_VictorSPX(RobotMap.Motors.J2Drive);
@@ -44,6 +44,7 @@ public class Jacks implements Component{
         mSpeed = 0;
   
       }
+
       J1.set(mSpeed);
       J2.set(mSpeed);
       
