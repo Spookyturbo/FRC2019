@@ -64,7 +64,7 @@ public class Robot extends TimedRobot {
     camera.setResolution(IMG_WIDTH, IMG_HEIGHT);
     camera.setExposureManual(20);
     SmartDashboard.putNumber("Exposure", 20);
-    visionThread = new VisionThread(camera, new GripPipeline(), pipeline -> {
+   /*visionThread = new VisionThread(camera, new GripPipeline(), pipeline -> {
         if (!pipeline.filterContoursOutput().isEmpty()) {
             Rect r = Imgproc.boundingRect(pipeline.filterContoursOutput().get(0));
             synchronized (imgLock) {
@@ -73,7 +73,7 @@ public class Robot extends TimedRobot {
         }
     });
     visionThread.start();
-
+*/
 
     //If the gyro is not plugged in this can throw an error, make sure it doesn't crash the robot
     try {
