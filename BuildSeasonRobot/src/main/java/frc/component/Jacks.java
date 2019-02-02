@@ -18,24 +18,19 @@ public class Jacks implements Component{
 
     WPI_VictorSPX J1 = new WPI_VictorSPX(RobotMap.Motors.J1Drive);
     WPI_VictorSPX J2 = new WPI_VictorSPX(RobotMap.Motors.J2Drive);
+
     DigitalInput  UL = new DigitalInput(RobotMap.upperLimitSwitch);
     DigitalInput  LL = new DigitalInput(RobotMap.lowerLimitSwitch);
 
     //Store a static instance and create it for the singleton pattern
     private static Jacks instance = new Jacks();
-    double mSpeed;
+    private double mSpeed;
 
     public void setSpeed(double speed) {
          mSpeed = speed;
     }
     
-
-
-
-
     private Jacks() {
-
-
         //Just here to remove the public constructor
     }
 
@@ -56,13 +51,7 @@ public class Jacks implements Component{
         //Code ran every loop
     }
     public static Jacks getInstance() {
-
-
-
       return instance;
   }
-
-
-
 
 }
