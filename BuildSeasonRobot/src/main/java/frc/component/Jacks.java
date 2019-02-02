@@ -21,10 +21,12 @@ public class Jacks {
     }
 
     @Override
-    public void Jacks() {
+    public void execute() {
         //Code ran every loop
     }
-
+    public static Jacks getInstance() {
+      return instance;
+  }
 
 
 
