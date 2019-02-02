@@ -44,7 +44,6 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
 
-
     //If the gyro is not plugged in this can throw an error, make sure it doesn't crash the robot
     try {
       gyro = new AHRS(SPI.Port.kMXP);
