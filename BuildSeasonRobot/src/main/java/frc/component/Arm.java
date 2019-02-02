@@ -8,14 +8,14 @@ package frc.component;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import frc.robot.RobotMap;
-
+import edu.wpi.first.wpilibj.DigitalInput;
 import frc.util.Component;
 
 //Implement component so that this can be included in the main loop
 public class Arm implements Component{
     WPI_VictorSPX armMotor = new WPI_VictorSPX(RobotMap.Motors.armMotor);
-    DigitalInput​ limitLower = new DigitalInput(RobotMap.armlimitLower);
-    DigitalInput​ limitUpper = new DigitalInput(RobotMap.armlimitUpper);
+    DigitalInput limitLower = new DigitalInput(RobotMap.armlimitLower);
+    DigitalInput limitUpper = new DigitalInput(RobotMap.armlimitUpper);
     //Store a static instance and create it for the singleton pattern
     private static Arm instance = new Arm();
 
@@ -32,10 +32,10 @@ System.out.print(word);
 */
     public void setSpeed(double speed) {
         mSpeed = speed;
-        if (limitLower.get && mSpeed<0){
+        if (limitLower.get() && mSpeed<0){
             mSpeed = 0;
         }
-        if (limitUpper.get && mSpeed>0){
+        if (limitUpper.get() && mSpeed>0){
             mSpeed = 0;
         }
     }

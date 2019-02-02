@@ -14,6 +14,6 @@ public class RobotMap {
         public final static int armMotor = 9;
         public final static int intake = 14;
     }
-public final static int armlimitLower = 3
-public final static int armlimitUpper = 13
+public final static int armlimitLower = 3;
+public final static int armlimitUpper = 13;
 }   
