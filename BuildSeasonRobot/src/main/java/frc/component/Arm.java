@@ -9,11 +9,6 @@ package frc.component;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
 
-
-import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
-
-
-
 import frc.util.Component;
 
 //Implement component so that this can be included in the main loop
