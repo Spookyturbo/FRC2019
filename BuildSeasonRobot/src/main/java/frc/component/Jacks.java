@@ -7,10 +7,12 @@
 
 package frc.component;
 
+import frc.util.Component;
+
 /**
  * Add your docs here.
  */
-public class Jacks {
+public class Jacks implements Component{
 
 
     //Store a static instance and create it for the singleton pattern
