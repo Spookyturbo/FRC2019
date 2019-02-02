@@ -7,6 +7,7 @@
 
 package frc.component;
 
+import frc.robot.RobotMap;
 import frc.util.Component;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 /**
@@ -14,8 +15,8 @@ import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
  */
 public class Jacks implements Component{
 
-    WPI_VictorSPX J1 = new WPI_VictorSPX(RobotMap.Motors.FRDrive);
-    WPI_VictorSPX J2 = new WPI_VictorSPX(RobotMap.Motors.FRDrive);
+    WPI_VictorSPX J1 = new WPI_VictorSPX(RobotMap.Motors.J1Drive);
+    WPI_VictorSPX J2 = new WPI_VictorSPX(RobotMap.Motors.J2Drive);
 
 
     //Store a static instance and create it for the singleton pattern
