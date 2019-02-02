@@ -21,6 +21,11 @@ public class Jacks implements Component{
 
     //Store a static instance and create it for the singleton pattern
     private static Jacks instance = new Jacks();
+    double mSpeed;
+
+    public void setSpeed(double speed) {
+         mSpeed = speed;
+    }
 
     private Jacks() {
 
@@ -30,8 +35,8 @@ public class Jacks implements Component{
 
     @Override
     public void execute() {
-
-
+      
+      
         //Code ran every loop
     }
     public static Jacks getInstance() {
