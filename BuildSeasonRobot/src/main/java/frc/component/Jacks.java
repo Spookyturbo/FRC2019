@@ -27,6 +27,16 @@ public class Jacks implements Component{
          mSpeed = speed;
     }
 
+
+
+    public class DigitalInput{
+
+
+        
+    }
+
+
+
     private Jacks() {
 
 
@@ -35,8 +45,9 @@ public class Jacks implements Component{
 
     @Override
     public void execute() {
+      J1.set(mSpeed);
+      J2.set(mSpeed);
       
-
       
         //Code ran every loop
     }
