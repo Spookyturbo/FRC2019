@@ -11,4 +11,22 @@ package frc.component;
  * Add your docs here.
  */
 public class Jacks {
+
+
+    //Store a static instance and create it for the singleton pattern
+    private static Jacks instance = new Jacks();
+
+    private Jacks() {
+        //Just here to remove the public constructor
+    }
+
+    @Override
+    public void Jacks() {
+        //Code ran every loop
+    }
+
+
+
+
+
 }
