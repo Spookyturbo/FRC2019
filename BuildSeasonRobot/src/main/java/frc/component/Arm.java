@@ -9,13 +9,18 @@ package frc.component;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import frc.robot.RobotMap;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Encoder;
 import frc.util.Component;
+import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.PIDOutput;
 
 //Implement component so that this can be included in the main loop
-public class Arm implements Component{
+public class Arm implements Component, PIDOutput{
     WPI_VictorSPX armMotor = new WPI_VictorSPX(RobotMap.Motors.armMotor);
-    DigitalInput limitLower = new DigitalInput(RobotMap.armlimitLower);
-    DigitalInput limitUpper = new DigitalInput(RobotMap.armlimitUpper);
+    DigitalInput limitLower = new DigitalInput(RobotMap.armLimitLower);
+    DigitalInput limitUpper = new DigitalInput(RobotMap.armLimitUpper);
+    Encoder armEncoder = new Encoder(RobotMap.armEncoder1, RobotMap.armEncoder2);
+    PIDController armPID = new PIDController(0, 0, 0, armEncoder, this);
     //Store a static instance and create it for the singleton pattern
     private static Arm instance = new Arm();
 
@@ -51,4 +56,9 @@ System.out.print(word);
     public static Arm getInstance() {
         return instance;
     }
+
+	@Override
+	public void pidWrite(double output) {
+		
+	}
 }

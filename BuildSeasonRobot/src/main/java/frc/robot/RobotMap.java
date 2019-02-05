@@ -10,6 +10,8 @@ public class RobotMap {
         public final static int armMotor = 9;
         public final static int intake = 14;
     }
-public final static int armlimitLower = 3;
-public final static int armlimitUpper = 13;
+public final static int armLimitLower = 3;
+public final static int armLimitUpper = 13;
+public final static int armEncoder1 = 16;
+public final static int armEncoder2 = 17;
 }   
