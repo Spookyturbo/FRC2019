@@ -27,6 +27,11 @@ public class Arm implements Component, PIDOutput{
     double mSpeed;
 
     private Arm() {
+        armPID.setInputRange(-1000000000000f, 10000000000f);
+        armPID.setOutputRange(-0.5, 0.5);
+        armPID.setAbsoluteTolerance(10);
+        armPID.setContinuous(false);
+        armPID.setSetpoint(0);
         //Just here to remove the public constructor
     }
 
