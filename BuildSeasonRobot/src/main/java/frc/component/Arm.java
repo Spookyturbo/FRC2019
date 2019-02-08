@@ -14,14 +14,15 @@ import frc.util.Component;
 //Implement component so that this can be included in the main loop
 public class Arm implements Component{
     WPI_VictorSPX armMotor = new WPI_VictorSPX(RobotMap.Motors.armMotor);
-    DigitalInput limitLower = new DigitalInput(RobotMap.armlimitLower);
-    DigitalInput limitUpper = new DigitalInput(RobotMap.armlimitUpper);
+    DigitalInput limitLower = new DigitalInput(RobotMap.limitSwitches.armDown);
+    DigitalInput limitUpper = new DigitalInput(RobotMap.limitSwitches.armUp);
     //Store a static instance and create it for the singleton pattern
-    private static Arm instance = new Arm();
+    private static Arm instance;
 
     double mSpeed;
 
     private Arm() {
+        armMotor.setInverted(true);
         //Just here to remove the public constructor
     }
 
@@ -49,6 +50,9 @@ System.out.print(word);
     }
 
     public static Arm getInstance() {
+        if(instance == null) {
+            instance = new Arm();
+        }
         return instance;
     }
 }

@@ -17,10 +17,10 @@ import frc.util.Component;
 public class Wrist implements Component {
 
     // Store a static instance and create it for the singleton pattern
-    private static Wrist instance = new Wrist();
+    private static Wrist instance;
     WPI_VictorSPX motor = new WPI_VictorSPX(RobotMap.Motors.wrist);
-    DigitalInput lowerLimitSwitch = new DigitalInput(RobotMap.wLowerLimitSwitch);
-    DigitalInput upperLimitSwitch = new DigitalInput(RobotMap.wUpperLimitSwitch);
+    DigitalInput lowerLimitSwitch = new DigitalInput(RobotMap.limitSwitches.wristDown);
+    DigitalInput upperLimitSwitch = new DigitalInput(RobotMap.limitSwitches.wristUp);
 
     double mSpeed;
 
@@ -46,6 +46,9 @@ public class Wrist implements Component {
     }
 
     public static Wrist getInstance() {
+        if(instance == null) {
+            instance = new Wrist();
+        }
         return instance;
     }
 }

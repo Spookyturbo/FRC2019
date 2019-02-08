@@ -11,12 +11,15 @@ import frc.component.Wrist;
 import frc.util.Component;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
 
 import java.util.ArrayList;
 
+import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
 
 
@@ -30,13 +33,16 @@ import com.kauailabs.navx.frc.AHRS;
  */
 
 public class Robot extends TimedRobot {
+
+  WPI_VictorSPX rotateJack = new WPI_VictorSPX(RobotMap.Motors.jackWheel);
   ArrayList<Component> components = new ArrayList<>();
   //Xbox Control
   XboxController xbox = new XboxController(OI.Driver.port);
+  Joystick joystick = new Joystick(OI.Assistant.port);
   AHRS gyro;
 
-  Encoder leftEncoder = new Encoder(0, 1);
-  Encoder rightEncoder = new Encoder(2, 3);
+  // Encoder leftEncoder = new Encoder(0, 1);
+  // Encoder rightEncoder = new Encoder(2, 3);
 
   Drive drive;
   Jacks jacks;
@@ -65,10 +71,13 @@ public class Robot extends TimedRobot {
     components.add(wrist);
     components.add(arm);
 
+    drive.invertX(true);
+    jacks.invertRearJack(true);
+
     SmartDashboard.putData("Auto choices", m_chooser);
 
-    leftEncoder.setName("Encoders", "Left");
-    rightEncoder.setName("Encoders", "Right");
+    // leftEncoder.setName("Encoders", "Left");
+    // rightEncoder.setName("Encoders", "Right");
 
     //If the gyro is not plugged in this can throw an error, make sure it doesn't crash the robot
     try {
@@ -90,7 +99,7 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
   }
 
-  @Override
+  @Override  
   public void autonomousInit() {
     m_autoSelected = m_chooser.getSelected();
     // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
@@ -120,7 +129,61 @@ public class Robot extends TimedRobot {
     double rotate = xbox.getX(Hand.kRight);
 
     drive.driveCartesian(x, y, rotate);
+
+    //Arm control
+    if(xbox.getBButton()) { //down
+      arm.setSpeed(0.4f);
+    }
+    else if(xbox.getAButton()) {//up
+      arm.setSpeed(-0.4f);
+    }
+    else {
+      arm.setSpeed(0);
+    }
     
+    if(xbox.getBumper(Hand.kLeft)) { //Out
+      intake.setSpeed(1);
+    }
+    else if(xbox.getBumper(Hand.kRight)) {//In
+      intake.setSpeed(-1);
+    }
+    else {
+      intake.setSpeed(0);
+    }
+
+    if(xbox.getXButton()) {
+      jacks.setFrontSpeed(0.4f);
+    }
+    else if(xbox.getYButton()) {
+      jacks.setFrontSpeed(-0.4f);
+    }
+    else {
+      jacks.setFrontSpeed(0f);
+    }
+
+    if(joystick.getRawButton(3)) {
+      jacks.setRearSpeed(0.4f);
+    }
+    else if(joystick.getRawButton(5)) {
+      jacks.setRearSpeed(-0.4f);
+    }
+    else {
+      jacks.setRearSpeed(0);
+    }
+
+    if(joystick.getRawButton(4)) {
+      rotateJack.set(1f);
+    }
+    else if(joystick.getRawButton(6)) {
+      rotateJack.set(-1f);
+    }
+    else {
+      rotateJack.set(0);
+    }
+
+    //Positive is up
+    wrist.setSpeed(joystick.getRawAxis(1));
+
     updateAllComponents();
   }
     
@@ -132,6 +195,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void testPeriodic() {
+
   }
 
   public void updateAllComponents() {

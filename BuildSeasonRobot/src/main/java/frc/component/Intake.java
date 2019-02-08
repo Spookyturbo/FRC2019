@@ -12,29 +12,31 @@ import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import frc.robot.RobotMap;
 
 //Implement component so that this can be included in the main loop
-public class Intake implements Component{
+public class Intake implements Component {
+
+    private static Intake instance;
     WPI_VictorSPX intakeMotor = new WPI_VictorSPX(RobotMap.Motors.intake);
     double mSpeed;
 
-    //Store a static instance and create it for the singleton pattern
-public void setSpeed(double Speed){
-    mSpeed = Speed;
-} 
-
-
-    private static Intake instance = new Intake();
+    // Store a static instance and create it for the singleton pattern
+    public void setSpeed(double Speed) {
+        mSpeed = Speed;
+    }
 
     private Intake() {
-        //Just here to remove the public constructor
+        // Just here to remove the public constructor
     }
 
     @Override
     public void execute() {
         intakeMotor.set(mSpeed);
-        //Code ran every loop
+        // Code ran every loop
     }
 
     public static Intake getInstance() {
+        if(instance == null) {
+            instance = new Intake();
+        }
         return instance;
     }
 }

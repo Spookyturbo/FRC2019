@@ -23,7 +23,7 @@ import frc.util.Component;
  * as mecanum
  */
 public class Drive implements Component {
-    private final static Drive instance = new Drive();
+    private static Drive instance;
 
     private WPI_VictorSPX FL;
     private WPI_VictorSPX BL;
@@ -37,6 +37,7 @@ public class Drive implements Component {
     private SpeedControllerGroup rightMotors;
 
     private boolean mecanum = false;
+    private boolean invertX = false;
 
     private double ySpeed, xSpeed, rotate;
 
@@ -58,7 +59,7 @@ public class Drive implements Component {
     public void driveCartesian(double ySpeed, double xSpeed, double rotate) {
         mecanum = true;
         this.ySpeed = ySpeed;
-        this.xSpeed = xSpeed;
+        this.xSpeed = (invertX) ? -xSpeed : xSpeed;
         this.rotate = rotate;
     }
 
@@ -81,6 +82,10 @@ public class Drive implements Component {
         }
     }
 
+    public void invertX(boolean b) {
+        invertX = b;
+    }
+
     //Debug the groups and individual motors
     public void debugMotors() {
         leftMotors.setName("DriveMotor", "Left Motors");
@@ -98,7 +103,7 @@ public class Drive implements Component {
         LiveWindow.add(FR);
         LiveWindow.add(BR);
     }
-    
+
     //Debug the mecanum drive
     public void debugMecanum() {
         mecanumDrive.setName("Drive System", "Mecanum");
@@ -119,6 +124,9 @@ public class Drive implements Component {
     }
 
     public static Drive getInstance() {
+        if(instance == null) {
+            instance = new Drive();
+        }
         return instance;
     }
 }
