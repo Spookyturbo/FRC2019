@@ -18,11 +18,17 @@ public class Wrist implements Component {
 
     // Store a static instance and create it for the singleton pattern
     private static Wrist instance;
+    
     WPI_VictorSPX motor = new WPI_VictorSPX(RobotMap.Motors.wrist);
+
     DigitalInput lowerLimitSwitch = new DigitalInput(RobotMap.limitSwitches.wristDown);
     DigitalInput upperLimitSwitch = new DigitalInput(RobotMap.limitSwitches.wristUp);
 
     double mSpeed;
+
+    private Wrist() {
+        // Just here to remove the public constructor
+    }
 
     public void setSpeed(double speed) {
         mSpeed = speed;
@@ -32,10 +38,6 @@ public class Wrist implements Component {
         } else if (lowerLimitSwitch.get()) {
             mSpeed = Math.max(mSpeed, 0);
         }
-    }
-
-    private Wrist() {
-        // Just here to remove the public constructor
     }
 
     @Override

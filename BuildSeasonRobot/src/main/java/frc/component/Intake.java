@@ -15,16 +15,17 @@ import frc.robot.RobotMap;
 public class Intake implements Component {
 
     private static Intake instance;
+    
     WPI_VictorSPX intakeMotor = new WPI_VictorSPX(RobotMap.Motors.intake);
     double mSpeed;
+
+    private Intake() {
+        // Just here to remove the public constructor
+    }
 
     // Store a static instance and create it for the singleton pattern
     public void setSpeed(double Speed) {
         mSpeed = Speed;
-    }
-
-    private Intake() {
-        // Just here to remove the public constructor
     }
 
     @Override

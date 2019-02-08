@@ -9,17 +9,11 @@ import frc.component.Intake;
 import frc.component.Jacks;
 import frc.component.Wrist;
 import frc.util.Component;
-import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.GenericHID.Hand;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
 
 import java.util.ArrayList;
 
-import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
 
 
@@ -33,16 +27,14 @@ import com.kauailabs.navx.frc.AHRS;
  */
 
 public class Robot extends TimedRobot {
-
-  WPI_VictorSPX rotateJack = new WPI_VictorSPX(RobotMap.Motors.jackWheel);
   ArrayList<Component> components = new ArrayList<>();
   //Xbox Control
-  XboxController xbox = new XboxController(OI.Driver.port);
-  Joystick joystick = new Joystick(OI.Assistant.port);
   AHRS gyro;
 
   // Encoder leftEncoder = new Encoder(0, 1);
   // Encoder rightEncoder = new Encoder(2, 3);
+
+  OI oi;
 
   Drive drive;
   Jacks jacks;
@@ -58,6 +50,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
+    oi = new OI();
     //Store in cleaner variables
     drive = Drive.getInstance();
     jacks = Jacks.getInstance();
@@ -72,7 +65,6 @@ public class Robot extends TimedRobot {
     components.add(arm);
 
     drive.invertX(true);
-    jacks.invertRearJack(true);
 
     SmartDashboard.putData("Auto choices", m_chooser);
 
@@ -124,71 +116,69 @@ public class Robot extends TimedRobot {
   
   @Override
   public void teleopPeriodic() {
-    double x = xbox.getX(Hand.kLeft);
-    double y = xbox.getY(Hand.kLeft);
-    double rotate = xbox.getX(Hand.kRight);
 
-    drive.driveCartesian(x, y, rotate);
+    drive.driveCartesian(oi.getHorizontalDriveSpeed(), oi.getVerticalDriveSpeed(), oi.getRotationalDriveSpeed());
 
     //Arm control
-    if(xbox.getBButton()) { //down
+    if(oi.armUpButton.get()) {
       arm.setSpeed(0.4f);
     }
-    else if(xbox.getAButton()) {//up
+    else if(oi.armDownButton.get()) {
       arm.setSpeed(-0.4f);
     }
     else {
       arm.setSpeed(0);
     }
     
-    if(xbox.getBumper(Hand.kLeft)) { //Out
+    //Intake control
+    if(oi.intakeOutButton.get()) {
       intake.setSpeed(1);
     }
-    else if(xbox.getBumper(Hand.kRight)) {//In
+    else if(oi.intakeInButton.get()) {
       intake.setSpeed(-1);
     }
     else {
       intake.setSpeed(0);
     }
 
-    if(xbox.getXButton()) {
+    //Front jack control
+    if(oi.frontJackUpButton.get()) {
       jacks.setFrontSpeed(0.4f);
     }
-    else if(xbox.getYButton()) {
+    else if(oi.frontJackDownButton.get()) {
       jacks.setFrontSpeed(-0.4f);
     }
     else {
       jacks.setFrontSpeed(0f);
     }
 
-    if(joystick.getRawButton(3)) {
+    //Rear jack control
+    if(oi.rearJackUpButton.get()) {
       jacks.setRearSpeed(0.4f);
     }
-    else if(joystick.getRawButton(5)) {
+    else if(oi.rearJackDownButton.get()) {
       jacks.setRearSpeed(-0.4f);
     }
     else {
       jacks.setRearSpeed(0);
     }
 
-    if(joystick.getRawButton(4)) {
-      rotateJack.set(1f);
+    //Jack wheel control
+    if(oi.joystick.getRawButton(4)) {
+      jacks.setWheelSpeed(1f);
     }
-    else if(joystick.getRawButton(6)) {
-      rotateJack.set(-1f);
+    else if(oi.joystick.getRawButton(6)) {
+      jacks.setWheelSpeed(-1f);
     }
     else {
-      rotateJack.set(0);
+      jacks.setWheelSpeed(0);
     }
 
     //Positive is up
-    wrist.setSpeed(joystick.getRawAxis(1));
+    wrist.setSpeed(oi.getWristSpeed());
 
     updateAllComponents();
   }
-    
-
-
 
   /**
    * This function is called periodically during test mode.

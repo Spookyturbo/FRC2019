@@ -19,6 +19,7 @@ public class Jacks implements Component {
 
   WPI_VictorSPX frontJack = new WPI_VictorSPX(RobotMap.Motors.frontJack);
   WPI_VictorSPX rearJack = new WPI_VictorSPX(RobotMap.Motors.rearJack);
+  WPI_VictorSPX jackWheel = new WPI_VictorSPX(RobotMap.Motors.jackWheel);
 
   DigitalInput frontUpperLimit = new DigitalInput(RobotMap.limitSwitches.frontjackUp);
   DigitalInput frontLowerLimit = new DigitalInput(RobotMap.limitSwitches.frontJackDown);
@@ -28,12 +29,15 @@ public class Jacks implements Component {
 
   // Store a static instance and create it for the singleton pattern
   private static Jacks instance;
-  
-  private boolean invertFrontMotor = false;
-  private boolean invertRearMotor = false;
 
   private double frontSpeed;
   private double rearSpeed;
+  private double wheelSpeed;
+
+  private Jacks() {
+    //Initialization
+    rearJack.setInverted(true);
+  }
 
   public void setFrontSpeed(double speed) {
     if(speed < 0 && frontLowerLimit.get()) {
@@ -57,25 +61,16 @@ public class Jacks implements Component {
     rearSpeed = speed;
   }
 
-  public void invertFrontJack(boolean state) {
-    frontJack.setInverted(state);
-  }
-
-  public void invertRearJack(boolean state) {
-    rearJack.setInverted(state);
-  }
-
-  private Jacks() {
-    // Just here to remove the public constructor
+  public void setWheelSpeed(double speed) {
+    wheelSpeed = speed;
   }
 
   @Override
   public void execute() {
-    System.out.println("Front lower: " + frontLowerLimit.get() + " Front Upper: " + frontUpperLimit.get());
+    // Code ran every loop
     frontJack.set(frontSpeed);
     rearJack.set(rearSpeed);
-
-    // Code ran every loop
+    jackWheel.set(wheelSpeed);
   }
 
   public static Jacks getInstance() {
