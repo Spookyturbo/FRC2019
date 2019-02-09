@@ -21,6 +21,7 @@ public class Jacks implements Component {
   WPI_VictorSPX rearJack = new WPI_VictorSPX(RobotMap.Motors.rearJack);
   WPI_VictorSPX jackWheel = new WPI_VictorSPX(RobotMap.Motors.jackWheel);
 
+  //UPPER = Physically on top. Upper limit switch will trigger when jacks are fully EXTENDED
   DigitalInput frontUpperLimit = new DigitalInput(RobotMap.limitSwitches.frontjackUp);
   DigitalInput frontLowerLimit = new DigitalInput(RobotMap.limitSwitches.frontJackDown);
 
@@ -36,6 +37,7 @@ public class Jacks implements Component {
 
   private Jacks() {
     //Initialization
+    frontJack.setInverted(false);
     rearJack.setInverted(true);
   }
 

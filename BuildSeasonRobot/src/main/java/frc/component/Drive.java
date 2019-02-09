@@ -31,7 +31,7 @@ public class Drive implements Component {
     private WPI_VictorSPX BR;
 
     private MecanumDrive mecanumDrive;
-    private DifferentialDrive tankDrive;
+    //private DifferentialDrive tankDrive;
 
     private SpeedControllerGroup leftMotors;
     private SpeedControllerGroup rightMotors;
@@ -52,7 +52,7 @@ public class Drive implements Component {
         rightMotors.setInverted(true);
 
         mecanumDrive = new MecanumDrive(FL, BL, FR, BR);
-        tankDrive = new DifferentialDrive(leftMotors, rightMotors);
+        //tankDrive = new DifferentialDrive(leftMotors, rightMotors);
     }
 
     //Mecanum Drive
@@ -75,10 +75,11 @@ public class Drive implements Component {
     public void execute() {
         if(mecanum) {
             mecanumDrive.driveCartesian(ySpeed, xSpeed, rotate);
+            
         }
         else {
             //X = left Y = right
-            tankDrive.tankDrive(xSpeed, ySpeed);
+            //tankDrive.tankDrive(xSpeed, ySpeed);
         }
     }
 
@@ -111,16 +112,16 @@ public class Drive implements Component {
     }
 
     //Debug the tank drive
-    public void debugTank() {
-        tankDrive.setName("Drive System", "Tank");
-        LiveWindow.add(tankDrive);
-    }
+    //public void debugTank() {
+    //    tankDrive.setName("Drive System", "Tank");
+    //    LiveWindow.add(tankDrive);
+    //}
 
     //Runs all of the debug software
     public void debugAll() {
         debugMotors();
         debugMecanum();
-        debugTank();
+        //debugTank();
     }
 
     public static Drive getInstance() {

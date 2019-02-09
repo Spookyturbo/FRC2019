@@ -9,7 +9,9 @@ import frc.component.Intake;
 import frc.component.Jacks;
 import frc.component.Wrist;
 import frc.util.Component;
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.SPI;
 
 import java.util.ArrayList;
@@ -31,7 +33,9 @@ public class Robot extends TimedRobot {
   //Xbox Control
   AHRS gyro;
 
-  // Encoder leftEncoder = new Encoder(0, 1);
+  Encoder armEncoder = new Encoder(10, 11);
+  Encoder leftEncoder = new Encoder(12, 13);
+  Encoder rightEncoder = new Encoder(14, 15);
   // Encoder rightEncoder = new Encoder(2, 3);
 
   OI oi;
@@ -50,6 +54,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
+    CameraServer.getInstance().startAutomaticCapture();
+
     oi = new OI();
     //Store in cleaner variables
     drive = Drive.getInstance();
@@ -118,63 +124,16 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
 
     drive.driveCartesian(oi.getHorizontalDriveSpeed(), oi.getVerticalDriveSpeed(), oi.getRotationalDriveSpeed());
-
-    //Arm control
-    if(oi.armUpButton.get()) {
-      arm.setSpeed(0.4f);
-    }
-    else if(oi.armDownButton.get()) {
-      arm.setSpeed(-0.4f);
-    }
-    else {
-      arm.setSpeed(0);
-    }
     
+    //Arm Control
+    arm.setSpeed(oi.getArmSpeed());
     //Intake control
-    if(oi.intakeOutButton.get()) {
-      intake.setSpeed(1);
-    }
-    else if(oi.intakeInButton.get()) {
-      intake.setSpeed(-1);
-    }
-    else {
-      intake.setSpeed(0);
-    }
-
-    //Front jack control
-    if(oi.frontJackUpButton.get()) {
-      jacks.setFrontSpeed(0.4f);
-    }
-    else if(oi.frontJackDownButton.get()) {
-      jacks.setFrontSpeed(-0.4f);
-    }
-    else {
-      jacks.setFrontSpeed(0f);
-    }
-
-    //Rear jack control
-    if(oi.rearJackUpButton.get()) {
-      jacks.setRearSpeed(0.4f);
-    }
-    else if(oi.rearJackDownButton.get()) {
-      jacks.setRearSpeed(-0.4f);
-    }
-    else {
-      jacks.setRearSpeed(0);
-    }
-
-    //Jack wheel control
-    if(oi.joystick.getRawButton(4)) {
-      jacks.setWheelSpeed(1f);
-    }
-    else if(oi.joystick.getRawButton(6)) {
-      jacks.setWheelSpeed(-1f);
-    }
-    else {
-      jacks.setWheelSpeed(0);
-    }
-
-    //Positive is up
+    intake.setSpeed(oi.getIntakeSpeed());
+    //Jack Control
+    jacks.setFrontSpeed(oi.getFrontJackSpeed());
+    jacks.setRearSpeed(oi.getRearJackSpeed());
+    jacks.setWheelSpeed(oi.getJackWheelSpeed());
+    //Wrist control
     wrist.setSpeed(oi.getWristSpeed());
 
     updateAllComponents();
