@@ -10,6 +10,9 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
@@ -32,6 +35,11 @@ public class Robot extends TimedRobot {
 
   Encoder leftEncoder = new Encoder(0, 1);
   Encoder rightEncoder = new Encoder(2, 3);
+
+  NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
+  NetworkTableEntry tx = table.getEntry("tx");
+  NetworkTableEntry ty = table.getEntry("ty");
+  NetworkTableEntry ta = table.getEntry("ta");
 
   private static final String kDefaultAuto = "Default";
   private static final String kCustomAuto = "My Auto";
@@ -65,6 +73,14 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
+
+    double x = tx.getDouble(0.0);
+    double y = ty.getDouble(0.0);
+    double area = ta.getDouble(0.0);
+
+    SmartDashboard.putNumber("LimelightX", x);
+    SmartDashboard.putNumber("LimelightY", y);
+    SmartDashboard.putNumber("LimelightArea", area);
   }
 
   @Override
@@ -100,11 +116,11 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    double y = -xbox.getY(Hand.kLeft);
-    double x = xbox.getX(Hand.kLeft);
-    double rotate = xbox.getX(Hand.kRight);
+   // double y = -xbox.getY(Hand.kLeft);
+  //  double x = xbox.getX(Hand.kLeft);
+    //double rotate = xbox.getX(Hand.kRight);
 
-    drive.driveCartesian(x, y, rotate);
+    //drive.driveCartesian(x, y, rotate);
     
     // if(xbox.getBumper(Hand.kLeft)) {
     //   intake.set(1f);
