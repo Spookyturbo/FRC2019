@@ -7,8 +7,8 @@ import edu.wpi.first.wpilibj.buttons.JoystickButton;
 
 public class OI {
     // Administrator, DriveTrials, Competition
-    private final String adminProfile = "Administrator";
-    private final String driverTrialsProfile = "DriveTrials";
+    public static final String adminProfile = "Administrator";
+    public static final String driverTrialsProfile = "DriveTrials";
     String profileName = driverTrialsProfile;
 
     XboxController xbox = new XboxController(0);
@@ -19,6 +19,10 @@ public class OI {
             frontJackExtendButton, rearJackUpButton, rearJackDownButton, wheelJackOutButton, wheelJackInButton;
 
     public OI() {
+        initButtons();
+    }
+
+    private void initButtons() {
         switch (profileName) {
         case adminProfile:
             armUpButton = new JoystickButton(xbox, 2);
@@ -46,6 +50,12 @@ public class OI {
         }
     }
 
+    public void setProfile(String profile) {
+        profileName = profile;
+
+        initButtons();
+    }
+
     // Strafing speed of the bot
     public double getHorizontalDriveSpeed() {
         // Deadzone (Controller has a bit of issues centering from the right)
@@ -68,14 +78,9 @@ public class OI {
         // Vertical axix, forward is negative
         switch (profileName) {
         case adminProfile:
-            if (xbox.getPOV() == 0) {
-                System.out.println("Wrist Up");
-                return 0.6f;
-            } else if (xbox.getPOV() == 180) {
-                System.out.println("Wrist Down");
-                return -0.6f;
-            }
-            break;
+            double wristSpeed = xbox.getTriggerAxis(Hand.kLeft) * 0.6f; // Add the up speed
+            wristSpeed += xbox.getTriggerAxis(Hand.kRight) * -0.65f;
+            return wristSpeed;
         case driverTrialsProfile:
             return -assistant.getY(Hand.kRight) / 0.6;
         }
@@ -115,9 +120,18 @@ public class OI {
     }
 
     public double getRearJackSpeed() {
+        int pov;
         switch (profileName) {
+        case adminProfile:
+            pov = xbox.getPOV();
+            if (pov == 0 || pov == 45 || pov == 315) {
+                return 1;
+            } else if (pov == 180 || pov == 225 || pov == 135) {
+                return -1;
+            }
+            break;
         case driverTrialsProfile:
-            int pov = assistant.getPOV();
+            pov = assistant.getPOV();
             if (pov == 0 || pov == 45 || pov == 315) {
                 return 1;
             } else if (pov == 180 || pov == 225 || pov == 135) {
@@ -129,10 +143,19 @@ public class OI {
     }
 
     public double getJackWheelSpeed() {
+        int pov;
+
         switch (profileName) {
         case adminProfile:
+            pov = xbox.getPOV();
+            if (pov == 90 || pov == 45 || pov == 135) {
+                return -1;
+            } else if (pov == 270 || pov == 225 || pov == 315) {
+                return 1;
+            }
+            break;
         case driverTrialsProfile:
-            int pov = assistant.getPOV();
+            pov = assistant.getPOV();
             if (pov == 90 || pov == 45 || pov == 135) {
                 return -1;
             } else if (pov == 270 || pov == 225 || pov == 315) {

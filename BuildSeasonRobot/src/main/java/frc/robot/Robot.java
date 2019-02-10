@@ -1,6 +1,8 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.CounterBase.EncodingType;
+import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.component.Arm;
@@ -33,9 +35,9 @@ public class Robot extends TimedRobot {
   //Xbox Control
   AHRS gyro;
 
-  Encoder armEncoder = new Encoder(10, 11);
-  Encoder leftEncoder = new Encoder(12, 13);
-  Encoder rightEncoder = new Encoder(14, 15);
+  Encoder armEncoder = new Encoder(8, 9, false, EncodingType.k4X);
+  Encoder leftEncoder = new Encoder(12, 13, false, EncodingType.k4X);
+  Encoder rightEncoder = new Encoder(14, 15, false, EncodingType.k4X);
   // Encoder rightEncoder = new Encoder(2, 3);
 
   OI oi;
@@ -46,7 +48,7 @@ public class Robot extends TimedRobot {
   Wrist wrist;
   Arm arm;
 
-  private String m_autoSelected;
+  private String m_driverSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
   /**
    * This function is run when the robot is first started up and should be
@@ -72,7 +74,18 @@ public class Robot extends TimedRobot {
 
     drive.invertX(true);
 
-    SmartDashboard.putData("Auto choices", m_chooser);
+    armEncoder.setName("Encoder", "Arm");
+    leftEncoder.setName("Encoder", "Left");
+    rightEncoder.setName("Encoder", "Right");
+
+    LiveWindow.add(armEncoder);
+    LiveWindow.add(leftEncoder);
+    LiveWindow.add(rightEncoder);
+
+    m_chooser.addDefault("Admin", OI.adminProfile);
+    m_chooser.addOption("DriveTrials", OI.driverTrialsProfile);
+
+    SmartDashboard.putData("Driver Mode", m_chooser);
 
     // leftEncoder.setName("Encoders", "Left");
     // rightEncoder.setName("Encoders", "Right");
@@ -99,9 +112,8 @@ public class Robot extends TimedRobot {
 
   @Override  
   public void autonomousInit() {
-    m_autoSelected = m_chooser.getSelected();
+    m_driverSelected = m_chooser.getSelected();
     // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
-    System.out.println("Auto selected: " + m_autoSelected);
   }
 
   /**
@@ -114,6 +126,10 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
+    m_driverSelected = m_chooser.getSelected();
+    if(m_driverSelected != null) {
+      oi.setProfile(m_driverSelected);
+    }
   }
 
   /**

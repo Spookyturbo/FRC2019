@@ -43,7 +43,7 @@ System.out.print(word);
 
     @Override
     public void execute() {
-
+        
         armMotor.set(mSpeed);
 
         //Code ran every loop
