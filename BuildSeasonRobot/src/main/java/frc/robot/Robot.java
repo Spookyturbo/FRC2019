@@ -18,6 +18,8 @@ import com.kauailabs.navx.frc.AHRS;
 
 public class Robot extends TimedRobot {
   //Xbox Control
+  Encoder sampleEncoder = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
+  
   XboxController xbox = new XboxController(OI.Driver.port);
 
   WPI_VictorSPX FL = new WPI_VictorSPX(RobotMap.Motors.FLDrive);
@@ -63,8 +65,6 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
   }
-
-  Encoder sampleEncoder = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
 
   @Override
   public void autonomousInit() {
