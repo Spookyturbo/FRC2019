@@ -25,7 +25,7 @@ import frc.util.Component;
 public class Drive implements Component {
     private static Drive instance;
 
-    private WPI_VictorSPX FL;
+    public WPI_VictorSPX FL;
     private WPI_VictorSPX BL;
     private WPI_VictorSPX FR;
     private WPI_VictorSPX BR;

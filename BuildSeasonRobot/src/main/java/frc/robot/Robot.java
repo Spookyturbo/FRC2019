@@ -16,6 +16,8 @@ import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.PIDOutput;
 
 import java.util.ArrayList;
 
@@ -29,7 +31,7 @@ import com.kauailabs.navx.frc.AHRS;
  * project.
  */
 
-public class Robot extends TimedRobot {
+public class Robot extends TimedRobot implements PIDOutput {
     ArrayList<Component> components = new ArrayList<>();
     // Xbox Control
     AHRS gyro;
@@ -51,6 +53,9 @@ public class Robot extends TimedRobot {
 
     private String m_driverSelected;
     private final SendableChooser<String> m_chooser = new SendableChooser<>();
+
+    PIDController turnController;
+    double turnRate;
 
     /**
      * This function is run when the robot is first started up and should be used
@@ -93,12 +98,21 @@ public class Robot extends TimedRobot {
 
         SmartDashboard.putData("Driver Mode", m_chooser);
 
+        turnController.setInputRange(-180.0f, 180.0f);
+        turnController.setOutputRange(-0.5, 0.5);
+        turnController.setAbsoluteTolerance(2);
+        turnController.setContinuous(true);
+        turnController.setSetpoint(0);
+        turnController.enable();
+        gyro.reset();
+
         // If the gyro is not plugged in this can throw an error, make sure it doesn't
         // crash the robot
         try {
             gyro = new AHRS(SPI.Port.kMXP);
             gyro.setName("Gyro", "Angle");
             LiveWindow.add(gyro);
+            turnController = new PIDController(0.03, 0, 0.05, gyro, this);
         } catch (RuntimeException e) {
             DriverStation.reportError("Error instantiating navX MXP:  " + e.getMessage(), true);
         }
@@ -178,5 +192,16 @@ public class Robot extends TimedRobot {
         for (Component component : components) {
             component.execute();
         }
+    }
+    public void Run() {
+      double Angle = gyro.getAngle() % 360;
+      SmartDashboard.putNumber("Angle", gyro.getAngle());
+      double MotorSpeed = SmartDashboard.getNumber("MotorSpeed", drive.FL.get());
+      System.out.println(MotorSpeed);
+      SmartDashboard.putNumber("MotorSpeed", MotorSpeed);
+    }
+    
+    public void pidWrite(double output) {
+      turnRate = output;
     }
 }
