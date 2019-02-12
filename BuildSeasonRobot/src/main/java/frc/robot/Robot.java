@@ -10,6 +10,7 @@ import frc.component.Drive;
 import frc.component.Intake;
 import frc.component.Jacks;
 import frc.component.Wrist;
+import frc.procedure.CameraAlign;
 import frc.util.Component;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -32,6 +33,8 @@ public class Robot extends TimedRobot {
     ArrayList<Component> components = new ArrayList<>();
     // Xbox Control
     AHRS gyro;
+
+    CameraAlign cameraAlign = new CameraAlign();
 
     Encoder armEncoder = new Encoder(8, 9, false, EncodingType.k4X);
     Encoder leftEncoder = new Encoder(12, 13, false, EncodingType.k4X);
@@ -144,6 +147,7 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopPeriodic() {
         System.out.println(armEncoder.get() + " " + leftEncoder.get() + " " + rightEncoder.get());
+
         drive.driveCartesian(controlProfile.getHorizontalDriveSpeed(), controlProfile.getVerticalDriveSpeed(),
                 controlProfile.getRotationalDriveSpeed());
 
