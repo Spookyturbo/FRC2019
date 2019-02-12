@@ -165,8 +165,8 @@ public class OI {
 
         @Override
         public double getWristSpeed() {
-            double wristSpeed = driver.getTriggerAxis(Hand.kLeft) * 0.65f; // Add the up speed
-            wristSpeed += driver.getTriggerAxis(Hand.kRight) * -0.65f; //Add the down speed
+            double wristSpeed = driver.getTriggerAxis(Hand.kLeft) * 1f; // Add the up speed
+            wristSpeed += driver.getTriggerAxis(Hand.kRight) * -1f; //Add the down speed
             return wristSpeed;
         }
 
