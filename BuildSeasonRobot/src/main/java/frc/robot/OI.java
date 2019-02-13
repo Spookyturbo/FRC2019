@@ -131,6 +131,8 @@ public class OI {
     //--------------------------------------ADMIN--------------------------------------
     static class AdminProfile implements ControlProfile {
 
+        public JoystickButton cameraTarget = new JoystickButton(driver, 7);
+
         JoystickButton armUpButton = new JoystickButton(driver, 2);
         JoystickButton armDownButton = new JoystickButton(driver, 1); // xbox A
 

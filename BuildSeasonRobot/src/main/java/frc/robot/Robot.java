@@ -11,6 +11,7 @@ import frc.component.Intake;
 import frc.component.Jacks;
 import frc.component.Wrist;
 import frc.procedure.CameraAlign;
+import frc.sensor.Limelight;
 import frc.util.Component;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -34,7 +35,7 @@ public class Robot extends TimedRobot {
     // Xbox Control
     AHRS gyro;
 
-    CameraAlign cameraAlign = new CameraAlign();
+    CameraAlign cameraAlign;
 
     Encoder armEncoder = new Encoder(8, 9, false, EncodingType.k4X);
     Encoder leftEncoder = new Encoder(12, 13, false, EncodingType.k4X);
@@ -59,7 +60,7 @@ public class Robot extends TimedRobot {
     @Override
     public void robotInit() {
         CameraServer.getInstance().startAutomaticCapture();
-
+        cameraAlign = new CameraAlign();
         // Init here, should be overwritten in telopinit
         controlProfile = OI.getProfile(OI.ADMIN_PROFILE);
 
@@ -78,7 +79,7 @@ public class Robot extends TimedRobot {
 
         drive.invertX(true);
 
-        //Encoder test
+        // Encoder test
         armEncoder.setName("Encoder", "Arm");
         leftEncoder.setName("Encoder", "Left");
         rightEncoder.setName("Encoder", "Right");
@@ -87,7 +88,7 @@ public class Robot extends TimedRobot {
         LiveWindow.add(leftEncoder);
         LiveWindow.add(rightEncoder);
 
-        //Put drive profiles on smartDashboard
+        // Put drive profiles on smartDashboard
         m_chooser.setDefaultOption("DriveTrials", OI.DRIVER_TRIALS_PROFILE);
         m_chooser.addOption("Admin", OI.ADMIN_PROFILE);
 
@@ -133,24 +134,28 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-        //Only swap profile if the profile was changed since last teleop
-        if(m_driverSelected != m_chooser.getSelected()) {
+        // Only swap profile if the profile was changed since last teleop
+        if (m_driverSelected != m_chooser.getSelected()) {
             m_driverSelected = m_chooser.getSelected();
             controlProfile = OI.getProfile(m_driverSelected);
         }
+        Limelight.getInstance().setPipeline(1);
     }
 
     /**
      * This function is called periodically during operator control.
      */
-    //leftEncoder = 8,9 
+    // leftEncoder = 8,9
     @Override
     public void teleopPeriodic() {
-        System.out.println(armEncoder.get() + " " + leftEncoder.get() + " " + rightEncoder.get());
-
         drive.driveCartesian(controlProfile.getHorizontalDriveSpeed(), controlProfile.getVerticalDriveSpeed(),
                 controlProfile.getRotationalDriveSpeed());
 
+        if (OI.ControlProfile.driver.getRawButtonPressed(7)) {
+            cameraAlign.resetPID();
+        } else if (OI.ControlProfile.driver.getRawButton(7)) {
+            cameraAlign.run();
+        }
         // Arm Control
         arm.setSpeed(controlProfile.getArmSpeed());
         // Intake control
@@ -161,7 +166,7 @@ public class Robot extends TimedRobot {
         jacks.setWheelSpeed(controlProfile.getJackWheelSpeed());
         // Wrist control
         wrist.setSpeed(controlProfile.getWristSpeed());
-
+        
         updateAllComponents();
     }
 

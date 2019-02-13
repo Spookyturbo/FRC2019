@@ -49,12 +49,16 @@ public class Limelight {
     private NetworkTable table;
 
     //Frequently used entries to store
-    private NetworkTableEntry tx = table.getEntry("tx");
-    private NetworkTableEntry ty = table.getEntry("ty");
-    private NetworkTableEntry ta = table.getEntry("ta");
+    private NetworkTableEntry tx;
+    private NetworkTableEntry ty;
+    private NetworkTableEntry ta;
 
     private Limelight() {
         table = NetworkTableInstance.getDefault().getTable("limelight");
+
+        tx = table.getEntry("tx");
+        ty = table.getEntry("ty");
+        ta = table.getEntry("ta");
     }
 
     //Whether camera has any valid targets
@@ -113,6 +117,13 @@ public class Limelight {
         return (int) table.getEntry("getpipe").getDouble(0);
     }
 
+    public double[] getXCorners() {
+        return table.getEntry("tcornx").getDoubleArray(new double[] {0, 0, 0, 0});
+    }
+
+    public double[] getYCorners() {
+        return table.getEntry("tcorny").getDoubleArray(new double[] {0, 0, 0, 0});
+    }
     //Sets the LEDs to either On, Off, Blinking, or determined by the pipeline
     public void setLightState(LightMode lMode) {
         table.getEntry("ledMode").setNumber(lMode.getLedMode());
