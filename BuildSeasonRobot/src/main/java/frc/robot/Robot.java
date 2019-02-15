@@ -1,6 +1,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -199,6 +200,18 @@ public class Robot extends TimedRobot implements PIDOutput {
       double MotorSpeed = SmartDashboard.getNumber("MotorSpeed", drive.FL.get());
       System.out.println(MotorSpeed);
       SmartDashboard.putNumber("MotorSpeed", MotorSpeed);
+        if(OI.ControlProfile.driver.getYButtonReleased()) {
+            turnController.setSetpoint(0);
+            }
+        if(OI.ControlProfile.driver.getBButtonReleased()) {
+            turnController.setSetpoint(90);
+            }
+        if(OI.ControlProfile.driver.getAButtonReleased()) {
+            turnController.setSetpoint(180);
+            }    
+        if(OI.ControlProfile.driver.getXButtonReleased()) {
+            turnController.setSetpoint(270);
+            }        
     }
     
     public void pidWrite(double output) {
