@@ -34,5 +34,8 @@ public class RobotMap {
     public final static class Encoders {
 
     }
-
+public final static int armLimitLower = 3;
+public final static int armLimitUpper = 13;
+public final static int armEncoder1 = 16;
+public final static int armEncoder2 = 17;
 }   

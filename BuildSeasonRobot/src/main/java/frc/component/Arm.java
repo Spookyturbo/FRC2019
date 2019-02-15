@@ -9,20 +9,31 @@ package frc.component;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import frc.robot.RobotMap;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.PIDOutput;
+import edu.wpi.first.wpilibj.Encoder;
 import frc.util.Component;
 
 //Implement component so that this can be included in the main loop
-public class Arm implements Component{
+public class Arm implements Component, PIDOutput{
     WPI_VictorSPX armMotor = new WPI_VictorSPX(RobotMap.Motors.armMotor);
     DigitalInput limitLower = new DigitalInput(RobotMap.limitSwitches.armDown);
     DigitalInput limitUpper = new DigitalInput(RobotMap.limitSwitches.armUp);
     //Store a static instance and create it for the singleton pattern
     private static Arm instance;
+    Encoder armEncoder = new Encoder(RobotMap.armEncoder1, RobotMap.armEncoder2);
+    PIDController armPID = new PIDController(0, 0, 0, armEncoder, this);
+    //Store a static instance and create it for the singleton pattern
 
     double mSpeed;
 
     private Arm() {
         armMotor.setInverted(true);
+        armPID.setInputRange(-1000000000000f, 10000000000f);
+        armPID.setOutputRange(-0.5, 0.5);
+        armPID.setAbsoluteTolerance(10);
+        armPID.setContinuous(false);
+        armPID.setSetpoint(0);
         //Just here to remove the public constructor
     }
 
@@ -50,9 +61,17 @@ System.out.print(word);
     }
 
     public static Arm getInstance() {
+
         if(instance == null) {
             instance = new Arm();
         }
         return instance;
     }
+
+
+	@Override
+	public void pidWrite(double output) {
+		
+	}
+
 }
