@@ -8,16 +8,43 @@
 package frc.procedure;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.component.Drive;
+import frc.robot.OI;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.PIDOutput;
+import edu.wpi.first.wpilibj.SPI;
+import com.kauailabs.navx.frc.AHRS;
+
 
 /**
  * Add your docs here.
  */
-public class GyroTurning {
+public class GyroTurning implements PIDOutput {
+    AHRS gyro;
+    PIDController turnController;
+    double turnRate;
+    OI.ControlProfile controlProfile;
+    
+    public void init() {
+        gyro = new AHRS(SPI.Port.kMXP);
+        gyro.setName("Gyro", "Angle");
+        turnController = new PIDController(0.03, 0, 0.05, gyro, this);
 
+        turnController.setInputRange(-180.0f, 180.0f);
+        turnController.setOutputRange(-0.5, 0.5);
+        turnController.setAbsoluteTolerance(2);
+        turnController.setContinuous(true);
+        turnController.setSetpoint(0);
+        turnController.enable();
+        gyro.reset();
+    }
     public void run() {
         turnController.setP(SmartDashboard.getNumber("TurnP", turnController.getP()));
         turnController.setI(SmartDashboard.getNumber("TurnI", turnController.getI()));
         turnController.setD(SmartDashboard.getNumber("TurnD", turnController.getD()));
+        
 
         System.out.println("Error: " + turnController.getError());
 
@@ -40,12 +67,15 @@ public class GyroTurning {
         }
         System.out.println("SetpointL " + turnController.getSetpoint());
         System.out.println("turn rate: " + turnRate);
-        drive.driveCartesian(0, 0, turnRate);
+        
+        Drive.getInstance().driveCartesian(0, 0, turnRate);
     }
 
     //Scale the angle input between -180 and 180
     public void setAngle(double angle) {
         turnController.setSetpoint(angle);
     }
-
+    public void pidWrite(double output) {
+        turnRate = output;
+      }
 }
