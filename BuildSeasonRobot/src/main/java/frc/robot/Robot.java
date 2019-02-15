@@ -84,7 +84,7 @@ public class Robot extends TimedRobot implements PIDOutput {
 
         drive.invertX(true);
 
-        //Encoder test
+        // Encoder test
         armEncoder.setName("Encoder", "Arm");
         leftEncoder.setName("Encoder", "Left");
         rightEncoder.setName("Encoder", "Right");
@@ -93,19 +93,11 @@ public class Robot extends TimedRobot implements PIDOutput {
         LiveWindow.add(leftEncoder);
         LiveWindow.add(rightEncoder);
 
-        //Put drive profiles on smartDashboard
+        // Put drive profiles on smartDashboard
         m_chooser.setDefaultOption("DriveTrials", OI.DRIVER_TRIALS_PROFILE);
         m_chooser.addOption("Admin", OI.ADMIN_PROFILE);
 
         SmartDashboard.putData("Driver Mode", m_chooser);
-
-        turnController.setInputRange(-180.0f, 180.0f);
-        turnController.setOutputRange(-0.5, 0.5);
-        turnController.setAbsoluteTolerance(2);
-        turnController.setContinuous(true);
-        turnController.setSetpoint(0);
-        turnController.enable();
-        gyro.reset();
 
         // If the gyro is not plugged in this can throw an error, make sure it doesn't
         // crash the robot
@@ -113,10 +105,23 @@ public class Robot extends TimedRobot implements PIDOutput {
             gyro = new AHRS(SPI.Port.kMXP);
             gyro.setName("Gyro", "Angle");
             LiveWindow.add(gyro);
-            turnController = new PIDController(0.03, 0, 0.05, gyro, this);
+            turnController = new PIDController(0.03, 0, 0, gyro, this);
+            turnController.setName("Angle", "GyroPID");
+            LiveWindow.add(turnController);
         } catch (RuntimeException e) {
             DriverStation.reportError("Error instantiating navX MXP:  " + e.getMessage(), true);
         }
+        gyro.reset();
+        turnController.setInputRange(-180.0, 180.0f);
+        turnController.setOutputRange(-0.8, 0.8);
+        turnController.setAbsoluteTolerance(2);
+        turnController.setContinuous(true);
+        turnController.setSetpoint(0);
+        turnController.enable();
+
+        SmartDashboard.putNumber("TurnP", turnController.getP());
+        SmartDashboard.putNumber("TurnI", turnController.getI());
+        SmartDashboard.putNumber("TurnD", turnController.getD());
     }
 
     /**
@@ -148,36 +153,38 @@ public class Robot extends TimedRobot implements PIDOutput {
 
     @Override
     public void teleopInit() {
-        //Only swap profile if the profile was changed since last teleop
-        if(m_driverSelected != m_chooser.getSelected()) {
+        // Only swap profile if the profile was changed since last teleop
+        if (m_driverSelected != m_chooser.getSelected()) {
             m_driverSelected = m_chooser.getSelected();
             controlProfile = OI.getProfile(m_driverSelected);
         }
+        gyro.reset();
     }
 
     /**
      * This function is called periodically during operator control.
      */
-    //leftEncoder = 8,9 
+    // leftEncoder = 8,9
     @Override
     public void teleopPeriodic() {
-        System.out.println(armEncoder.get() + " " + leftEncoder.get() + " " + rightEncoder.get());
+        Run();
+        // System.out.println(armEncoder.get() + " " + leftEncoder.get() + " " + rightEncoder.get());
 
-        drive.driveCartesian(controlProfile.getHorizontalDriveSpeed(), controlProfile.getVerticalDriveSpeed(),
-                controlProfile.getRotationalDriveSpeed());
+        // drive.driveCartesian(controlProfile.getHorizontalDriveSpeed(), controlProfile.getVerticalDriveSpeed(),
+        //         controlProfile.getRotationalDriveSpeed());
 
-        // Arm Control
-        arm.setSpeed(controlProfile.getArmSpeed());
-        // Intake control
-        intake.setSpeed(controlProfile.getIntakeSpeed());
-        // Jack Control
-        jacks.setFrontSpeed(controlProfile.getFrontJackSpeed());
-        jacks.setRearSpeed(controlProfile.getRearJackSpeed());
-        jacks.setWheelSpeed(controlProfile.getJackWheelSpeed());
-        // Wrist control
-        wrist.setSpeed(controlProfile.getWristSpeed());
+        // // Arm Control
+        // arm.setSpeed(controlProfile.getArmSpeed());
+        // // Intake control
+        // intake.setSpeed(controlProfile.getIntakeSpeed());
+        // // Jack Control
+        // jacks.setFrontSpeed(controlProfile.getFrontJackSpeed());
+        // jacks.setRearSpeed(controlProfile.getRearJackSpeed());
+        // jacks.setWheelSpeed(controlProfile.getJackWheelSpeed());
+        // // Wrist control
+        // wrist.setSpeed(controlProfile.getWristSpeed());
 
-        updateAllComponents();
+         updateAllComponents();
     }
 
     /**
@@ -194,27 +201,38 @@ public class Robot extends TimedRobot implements PIDOutput {
             component.execute();
         }
     }
+
     public void Run() {
-      double Angle = gyro.getAngle() % 360;
-      SmartDashboard.putNumber("Angle", gyro.getAngle());
-      double MotorSpeed = SmartDashboard.getNumber("MotorSpeed", drive.FL.get());
-      System.out.println(MotorSpeed);
-      SmartDashboard.putNumber("MotorSpeed", MotorSpeed);
-        if(OI.ControlProfile.driver.getYButtonReleased()) {
+        turnController.setP(SmartDashboard.getNumber("TurnP", turnController.getP()));
+        turnController.setI(SmartDashboard.getNumber("TurnI", turnController.getI()));
+        turnController.setD(SmartDashboard.getNumber("TurnD", turnController.getD()));
+
+        System.out.println("Error: " + turnController.getError());
+
+        double Angle = gyro.getAngle() % 360;
+        SmartDashboard.putNumber("Angle", gyro.getAngle());
+        double MotorSpeed = SmartDashboard.getNumber("MotorSpeed", drive.FL.get());
+        System.out.println(MotorSpeed);
+        SmartDashboard.putNumber("MotorSpeed", MotorSpeed);
+        if (OI.ControlProfile.driver.getYButtonReleased()) {
             turnController.setSetpoint(0);
-            }
-        if(OI.ControlProfile.driver.getBButtonReleased()) {
+        }
+        if (OI.ControlProfile.driver.getBButtonReleased()) {
             turnController.setSetpoint(90);
-            }
-        if(OI.ControlProfile.driver.getAButtonReleased()) {
+        }
+        if (OI.ControlProfile.driver.getAButtonReleased()) {
             turnController.setSetpoint(180);
-            }    
-        if(OI.ControlProfile.driver.getXButtonReleased()) {
-            turnController.setSetpoint(270);
-            }        
+        }
+        if (OI.ControlProfile.driver.getXButtonReleased()) {
+            turnController.setSetpoint(-90);
+        }
+        System.out.println("SetpointL " + turnController.getSetpoint());
+        System.out.println("turn rate: " + turnRate);
+        drive.driveCartesian(0, 0, turnRate);
+        
     }
-    
+
     public void pidWrite(double output) {
-      turnRate = output;
+        turnRate = output;
     }
 }
