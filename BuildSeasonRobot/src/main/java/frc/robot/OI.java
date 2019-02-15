@@ -3,21 +3,22 @@ package frc.robot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
+import frc.component.Arm;
 
 public class OI {
     // Administrator, DriveTrials, Competition
     public static final String ADMIN_PROFILE = "Administrator";
     public static final String DRIVER_TRIALS_PROFILE = "DriveTrials";
 
-    //Create and return the profile
+    // Create and return the profile
     public static ControlProfile getProfile(String profile) {
-        switch(profile) {
-            default:
-                return new DriverTrialsProfile();
-            case ADMIN_PROFILE:
-                return new AdminProfile();
-            case DRIVER_TRIALS_PROFILE:
-                return new DriverTrialsProfile();
+        switch (profile) {
+        default:
+            return new DriverTrialsProfile();
+        case ADMIN_PROFILE:
+            return new AdminProfile();
+        case DRIVER_TRIALS_PROFILE:
+            return new DriverTrialsProfile();
         }
     }
 
@@ -44,7 +45,7 @@ public class OI {
         double getIntakeSpeed();
     }
 
-    //--------------------------------------DRIVERTRIALS--------------------------------------
+    // --------------------------------------DRIVERTRIALS--------------------------------------
     static class DriverTrialsProfile implements ControlProfile {
 
         JoystickButton intakeOutButton = new JoystickButton(assistant, 6); // right bumper
@@ -128,7 +129,7 @@ public class OI {
 
     }
 
-    //--------------------------------------ADMIN--------------------------------------
+    // --------------------------------------ADMIN--------------------------------------
     static class AdminProfile implements ControlProfile {
 
         public JoystickButton cameraTarget = new JoystickButton(driver, 7);
@@ -168,19 +169,54 @@ public class OI {
         @Override
         public double getWristSpeed() {
             double wristSpeed = driver.getTriggerAxis(Hand.kLeft) * 1f; // Add the up speed
-            wristSpeed += driver.getTriggerAxis(Hand.kRight) * -1f; //Add the down speed
+            wristSpeed += driver.getTriggerAxis(Hand.kRight) * -1f; // Add the down speed
             return wristSpeed;
         }
 
         @Override
         public double getArmSpeed() {
+            Arm arm = Arm.getInstance();
+            double armSpeed = 0;
+
             if (armUpButton.get()) {
-                return 0.4f;
+                armSpeed = 0.4f;
             } else if (armDownButton.get()) {
-                return -0.4f;
+                armSpeed = -0.4f;
             }
 
-            return 0;
+            if (arm.isPIDEnabled()) {
+                double setPoint = Arm.getInstance().getSetpoint();
+                if (driver.getBButtonPressed()) { // Up
+                    if (setPoint < 0) {
+                        arm.setSetpoint(0);;
+                    } else if (setPoint < Arm.ARM_LOW) {
+                        arm.setLow();
+                    } else if (setPoint < Arm.ARM_MIDDLE) {
+                        arm.setMiddle();
+                    } else if (setPoint < Arm.ARM_HIGH) {
+                        arm.setHigh();;
+                    }
+                } else if (driver.getAButtonPressed()) { // Down
+                    if(setPoint > Arm.ARM_HIGH) {
+                        arm.setHigh();
+                    }
+                    else if (setPoint > Arm.ARM_MIDDLE) {
+                        arm.setMiddle();
+                    } else if (setPoint > Arm.ARM_LOW) {
+                        arm.setLow();
+                    } else if (setPoint > 0) {
+                        arm.setSetpoint(0);
+                    }
+                }
+                else if(driver.getStickButtonPressed(Hand.kRight)) {
+                    arm.setSetpoint(arm.getSetpoint() - 6);
+                }
+
+                // Speed is set in arm via PID
+                armSpeed = arm.getSpeed();
+            }
+
+            return armSpeed;
         }
 
         @Override
