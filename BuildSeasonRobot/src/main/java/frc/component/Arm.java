@@ -25,11 +25,14 @@ public class Arm implements Component, PIDOutput {
     // Store a static instance and create it for the singleton pattern
     private static Arm instance;
     Encoder armEncoder = new Encoder(RobotMap.Encoders.armA, RobotMap.Encoders.armB, false, EncodingType.k4X);
-    PIDController armPID = new PIDController(0.03, 0.001, 0.1, armEncoder, this);
+    PIDController armPID = new PIDController(0.02, 0.001, 0.2, armEncoder, this);
 
     public static final double ARM_HIGH = 63.75f;
     public static final double ARM_MIDDLE = 37f;
     public static final double ARM_LOW = 11f;
+
+    //Used to combat friction in regards to the integral term
+    private final double minSpeed = 0.12;
     // Store a static instance and create it for the singleton pattern
 
     double mSpeed;
@@ -84,7 +87,7 @@ public class Arm implements Component, PIDOutput {
         System.out.println("Speed of arm: " + mSpeed);
         System.out.println("Arm encoder: " + armEncoder.get());
         System.out.println("At setpoint: " + armPID.onTarget());
-        if(armPID.onTarget()) {
+        if(armPID.onTarget() || armPID.getError() > 5) {
             armPID.setI(0);
         }
         else {
@@ -126,7 +129,7 @@ public class Arm implements Component, PIDOutput {
 
     @Override
     public void pidWrite(double output) {
-        mSpeed = output;
+        mSpeed = output + Math.copySign(minSpeed, output);
     }
 
     public void enablePID() {
