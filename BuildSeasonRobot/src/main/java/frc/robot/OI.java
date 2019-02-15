@@ -21,7 +21,7 @@ public class OI {
         }
     }
 
-    interface ControlProfile {
+    public interface ControlProfile {
         XboxController driver = new XboxController(0);
         XboxController assistant = new XboxController(1);
 
