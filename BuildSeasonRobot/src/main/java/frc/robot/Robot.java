@@ -60,6 +60,7 @@ public class Robot extends TimedRobot {
     @Override
     public void robotInit() {
         CameraServer.getInstance().startAutomaticCapture();
+        
         cameraAlign = new CameraAlign();
         // Init here, should be overwritten in telopinit
         controlProfile = OI.getProfile(OI.ADMIN_PROFILE);
@@ -176,6 +177,11 @@ public class Robot extends TimedRobot {
     @Override
     public void testPeriodic() {
 
+    }
+
+    @Override
+    public void disabledInit() {
+        Limelight.getInstance().setLightState(Limelight.LightMode.OFF);
     }
 
     public void updateAllComponents() {
