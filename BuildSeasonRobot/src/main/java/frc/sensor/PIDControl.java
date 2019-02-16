@@ -200,6 +200,9 @@ public class PIDControl extends SendableBase {
     // Uses reading given and feedforward term to determine speed based off error
     public double calculate(double input, double feedForward) {
         double error = setpoint - input;
+        //Scale the error
+        error *= 1 / (maxInput - minInput)
+
         double derivativeError = (error - previousError) / deltaTime;
         double integralError;
 
