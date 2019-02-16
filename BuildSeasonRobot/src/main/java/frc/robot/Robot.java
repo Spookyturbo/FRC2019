@@ -2,6 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
+import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -63,7 +64,10 @@ public class Robot extends TimedRobot {
         cameraAlign = new CameraAlign();
         // Init here, should be overwritten in telopinit
         controlProfile = OI.getProfile(OI.ADMIN_PROFILE);
-
+        controlProfile = OI.getProfile(OI.DRIVER_TRIALS_PROFILE);
+        controlProfile = new OI.DriverTrialsProfile();
+        controlProfile = new OI.AdminProfile();
+        
         // Store in cleaner variables
         drive = Drive.getInstance();
         jacks = Jacks.getInstance();
@@ -159,13 +163,18 @@ public class Robot extends TimedRobot {
                 arm.enablePID();
             }
         }
+        OI.DriverTrialsProfile driverTrialsProfile = new OI.DriverTrialsProfile();
+        OI.AdminProfile adminProfile = new OI.AdminProfile();
 
+        OI.ControlProfile profile = new OI.AdminProfile();
+        driverTrialsProfile.getArmSpeed();
+        adminProfile.getArmSpeed();
         if (OI.ControlProfile.driver.getRawButtonPressed(7)) {
             cameraAlign.resetPID();
         } else if (OI.ControlProfile.driver.getRawButton(7)) {
             cameraAlign.run();
         }
-        
+
         // Arm Control
         arm.setSpeed(controlProfile.getArmSpeed());
         // Intake control
