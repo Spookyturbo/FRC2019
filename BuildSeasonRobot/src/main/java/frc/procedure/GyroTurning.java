@@ -26,11 +26,14 @@ public class GyroTurning implements PIDOutput {
     PIDController turnController;
     double turnRate;
     OI.ControlProfile controlProfile;
+    Drive drive = Drive.getInstance();
+    
     
     public void init() {
         gyro = new AHRS(SPI.Port.kMXP);
         gyro.setName("Gyro", "Angle");
         turnController = new PIDController(0.03, 0, 0.05, gyro, this);
+        
 
         turnController.setInputRange(-180.0f, 180.0f);
         turnController.setOutputRange(-0.5, 0.5);
