@@ -11,47 +11,75 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.RobotMap;
 import frc.util.Component;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
+
 /**
  * Add your docs here.
  */
-public class Jacks implements Component{
+public class Jacks implements Component {
 
-    WPI_VictorSPX J1 = new WPI_VictorSPX(RobotMap.Motors.J1Drive);
-    WPI_VictorSPX J2 = new WPI_VictorSPX(RobotMap.Motors.J2Drive);
+  WPI_VictorSPX frontJack = new WPI_VictorSPX(RobotMap.Motors.frontJack);
+  WPI_VictorSPX rearJack = new WPI_VictorSPX(RobotMap.Motors.rearJack);
+  WPI_VictorSPX jackWheel = new WPI_VictorSPX(RobotMap.Motors.jackWheel);
 
-    DigitalInput  UL = new DigitalInput(RobotMap.upperLimitSwitch);
-    DigitalInput  LL = new DigitalInput(RobotMap.lowerLimitSwitch);
+  //UPPER = Physically on top. Upper limit switch will trigger when jacks are fully EXTENDED
+  DigitalInput frontUpperLimit = new DigitalInput(RobotMap.limitSwitches.frontjackUp);
+  DigitalInput frontLowerLimit = new DigitalInput(RobotMap.limitSwitches.frontJackDown);
 
-    //Store a static instance and create it for the singleton pattern
-    private static Jacks instance = new Jacks();
-    private double mSpeed;
+  DigitalInput rearUpperLimit = new DigitalInput(RobotMap.limitSwitches.rearJackUp);
+  DigitalInput rearLowerLimit = new DigitalInput(RobotMap.limitSwitches.rearJackDown);
 
-    public void setSpeed(double speed) {
-         mSpeed = speed;
+  // Store a static instance and create it for the singleton pattern
+  private static Jacks instance;
+
+  private double frontSpeed;
+  private double rearSpeed;
+  private double wheelSpeed;
+
+  private Jacks() {
+    //Initialization
+    frontJack.setInverted(false);
+    rearJack.setInverted(true);
+  }
+
+  public void setFrontSpeed(double speed) {
+    if(speed < 0 && frontLowerLimit.get()) {
+      speed = 0;
     }
-    
-    private Jacks() {
-        //Just here to remove the public constructor
+    else if(speed > 0 && frontUpperLimit.get()) {
+      speed = 0;
     }
 
-    @Override
-    public void execute() {
-      if (mSpeed < 0 && LL.get())  {
-        mSpeed = 0;
-  
-      }
-      if (mSpeed > 0 && UL.get())  {
-        mSpeed = 0;
-  
-      }
-      J1.set(mSpeed);
-      J2.set(mSpeed);
-      
-      
-        //Code ran every loop
+    frontSpeed = speed;
+  }
+
+  public void setRearSpeed(double speed) {
+    if(speed < 0 && rearLowerLimit.get()) {
+      speed = 0;
     }
-    public static Jacks getInstance() {
-      return instance;
+    else if(speed > 0 && rearUpperLimit.get()) {
+      speed = 0;
+    }
+
+    rearSpeed = speed;
+  }
+
+  public void setWheelSpeed(double speed) {
+    wheelSpeed = speed;
+  }
+
+  @Override
+  public void execute() {
+    // Code ran every loop
+    frontJack.set(frontSpeed);
+    rearJack.set(rearSpeed);
+    jackWheel.set(wheelSpeed);
+  }
+
+  public static Jacks getInstance() {
+    if(instance == null) {
+      instance = new Jacks();
+    }
+    return instance;
   }
 
 }

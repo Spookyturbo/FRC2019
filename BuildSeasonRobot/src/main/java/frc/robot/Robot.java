@@ -1,126 +1,188 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.CounterBase.EncodingType;
+import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.component.Arm;
+import frc.component.Drive;
+import frc.component.Intake;
 import frc.component.Jacks;
+import frc.component.Wrist;
+import frc.procedure.CameraAlign;
+import frc.sensor.Limelight;
 import frc.util.Component;
-import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.GenericHID.Hand;
-import edu.wpi.first.wpilibj.drive.MecanumDrive;
-import edu.wpi.first.wpilibj.livewindow.LiveWindow;
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.SPI;
 
 import java.util.ArrayList;
 
-import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
-
 import com.kauailabs.navx.frc.AHRS;
 
+/**
+ */
+
 public class Robot extends TimedRobot {
-  ArrayList<Component> components = new ArrayList<>();
-  //Xbox Control
-  XboxController xbox = new XboxController(OI.Driver.port);
+    ArrayList<Component> components = new ArrayList<>();
+    // Xbox Control
+    AHRS gyro;
 
-  WPI_VictorSPX FL = new WPI_VictorSPX(RobotMap.Motors.FLDrive);
-  WPI_VictorSPX BL = new WPI_VictorSPX(RobotMap.Motors.BLDrive);
-  WPI_VictorSPX FR = new WPI_VictorSPX(RobotMap.Motors.FRDrive);
-  WPI_VictorSPX BR = new WPI_VictorSPX(RobotMap.Motors.BRDrive);
+    CameraAlign cameraAlign;
 
-  //WPI_VictorSPX intake = new WPI_VictorSPX(RobotMap.Motors.intake);
+    Encoder armEncoder = new Encoder(8, 9, false, EncodingType.k4X);
+    Encoder leftEncoder = new Encoder(12, 13, false, EncodingType.k4X);
+    Encoder rightEncoder = new Encoder(10, 11, false, EncodingType.k4X);
+    // Encoder rightEncoder = new Encoder(2, 3);
 
-  MecanumDrive drive = new MecanumDrive(FL, BL, FR, BR);
+    OI.ControlProfile controlProfile;
 
-  AHRS gyro;
+    Drive drive;
+    Jacks jacks;
+    Intake intake;
+    Wrist wrist;
+    Arm arm;
 
-  Encoder leftEncoder = new Encoder(0, 1);
-  Encoder rightEncoder = new Encoder(2, 3);
+    private String m_driverSelected;
+    private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
-  private String m_autoSelected;
-  private final SendableChooser<String> m_chooser = new SendableChooser<>();
+    /**
+     * This function is run when the robot is first started up and should be used
+     * for any initialization code.
+     */
+    @Override
+    public void robotInit() {
+        CameraServer.getInstance().startAutomaticCapture();
+        
+        cameraAlign = new CameraAlign();
+        // Init here, should be overwritten in telopinit
+        controlProfile = OI.getProfile(OI.ADMIN_PROFILE);
 
-  /**
-   * This function is run when the robot is first started up and should be
-   * used for any initialization code.
-   */
-  @Override
-  public void robotInit() {
-    components.add(Jacks.getInstance());
-    SmartDashboard.putData("Auto choices", m_chooser);
+        // Store in cleaner variables
+        drive = Drive.getInstance();
+        jacks = Jacks.getInstance();
+        intake = Intake.getInstance();
+        wrist = Wrist.getInstance();
+        arm = Arm.getInstance();
 
-    leftEncoder.setName("Encoders", "Left");
-    rightEncoder.setName("Encoders", "Right");
+        components.add(drive);
+        components.add(jacks);
+        components.add(intake);
+        components.add(wrist);
+        components.add(arm);
 
-    LiveWindow.add(leftEncoder);
-    LiveWindow.add(rightEncoder);
-  }
+        drive.invertX(true);
 
-  /**
-   * This function is called every robot packet, no matter the mode. Use
-   * this for items like diagnostics that you want ran during disabled,
-   * autonomous, teleoperated and test.
-   *
-   * <p>This runs after the mode specific periodic functions, but before
-   * LiveWindow and SmartDashboard integrated updating.
-   */
-  @Override
-  public void robotPeriodic() {
-  }
+        // Encoder test
+        armEncoder.setName("Encoder", "Arm");
+        leftEncoder.setName("Encoder", "Left");
+        rightEncoder.setName("Encoder", "Right");
 
-  @Override
-  public void autonomousInit() {
-    m_autoSelected = m_chooser.getSelected();
-    // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
-    System.out.println("Auto selected: " + m_autoSelected);
-  }
+        LiveWindow.add(armEncoder);
+        LiveWindow.add(leftEncoder);
+        LiveWindow.add(rightEncoder);
 
-  /**
-   * This function is called periodically during autonomous.
-   */
-  @Override
-  public void autonomousPeriodic() {
-    for(Component component : components) {
-      component.execute();
+        // Put drive profiles on smartDashboard
+        m_chooser.setDefaultOption("DriveTrials", OI.DRIVER_TRIALS_PROFILE);
+        m_chooser.addOption("Admin", OI.ADMIN_PROFILE);
+
+        SmartDashboard.putData("Driver Mode", m_chooser);
+
+        // If the gyro is not plugged in this can throw an error, make sure it doesn't
+        // crash the robot
+        try {
+            gyro = new AHRS(SPI.Port.kMXP);
+            gyro.setName("Gyro", "Angle");
+            LiveWindow.add(gyro);
+        } catch (RuntimeException e) {
+            DriverStation.reportError("Error instantiating navX MXP:  " + e.getMessage(), true);
+        }
     }
-  }
 
-  @Override
-  public void teleopInit() {
-    //gyro.reset();
-  }
-
-  /**
-   * This function is called periodically during operator control.
-   */
-  @Override
-  public void teleopPeriodic() {
-    double y = -xbox.getY(Hand.kLeft);
-    double x = xbox.getX(Hand.kLeft);
-    double rotate = xbox.getX(Hand.kRight);
-
-    drive.driveCartesian(x, y, rotate);
-    
-    // if(xbox.getBumper(Hand.kLeft)) {
-    //   intake.set(1f);
-    // }
-    // else if(xbox.getBumper(Hand.kRight)) {
-    //   intake.set(-1f);
-    // }
-    // else {
-    //   intake.set(0);
-    // }
-    //run all of our components
-    for(Component component : components) {
-      component.execute();
+    /**
+     * This function is called every robot packet, no matter the mode. Use this for
+     * items like diagnostics that you want ran during disabled, autonomous,
+     * teleoperated and test.
+     *
+     * <p>
+     * This runs after the mode specific periodic functions, but before LiveWindow
+     * and SmartDashboard integrated updating.
+     */
+    @Override
+    public void robotPeriodic() {
     }
-  }
 
-  /**
-   * This function is called periodically during test mode.
-   */
-  @Override
-  public void testPeriodic() {
-  }
+    @Override
+    public void autonomousInit() {
+        m_driverSelected = m_chooser.getSelected();
+        // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
+    }
+
+    /**
+     * This function is called periodically during autonomous.
+     */
+    @Override
+    public void autonomousPeriodic() {
+        updateAllComponents();
+    }
+
+    @Override
+    public void teleopInit() {
+        // Only swap profile if the profile was changed since last teleop
+        if (m_driverSelected != m_chooser.getSelected()) {
+            m_driverSelected = m_chooser.getSelected();
+            controlProfile = OI.getProfile(m_driverSelected);
+        }
+        Limelight.getInstance().setPipeline(1);
+    }
+
+    /**
+     * This function is called periodically during operator control.
+     */
+    // leftEncoder = 8,9
+    @Override
+    public void teleopPeriodic() {
+        drive.driveCartesian(controlProfile.getHorizontalDriveSpeed(), controlProfile.getVerticalDriveSpeed(),
+                controlProfile.getRotationalDriveSpeed());
+
+        if (OI.ControlProfile.driver.getRawButtonPressed(7)) {
+            cameraAlign.resetPID();
+        } else if (OI.ControlProfile.driver.getRawButton(7)) {
+            cameraAlign.run();
+        }
+        // Arm Control
+        arm.setSpeed(controlProfile.getArmSpeed());
+        // Intake control
+        intake.setSpeed(controlProfile.getIntakeSpeed());
+        // Jack Control
+        jacks.setFrontSpeed(controlProfile.getFrontJackSpeed());
+        jacks.setRearSpeed(controlProfile.getRearJackSpeed());
+        jacks.setWheelSpeed(controlProfile.getJackWheelSpeed());
+        // Wrist control
+        wrist.setSpeed(controlProfile.getWristSpeed());
+        
+        updateAllComponents();
+    }
+
+    /**
+     * This function is called periodically during test mode.
+     */
+    @Override
+    public void testPeriodic() {
+
+    }
+
+    @Override
+    public void disabledInit() {
+        Limelight.getInstance().setLightState(Limelight.LightMode.OFF);
+    }
+
+    public void updateAllComponents() {
+        // run all of our components
+        for (Component component : components) {
+            component.execute();
+        }
+    }
 }
