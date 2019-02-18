@@ -15,6 +15,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.SPI.Port;
+
 import com.kauailabs.navx.frc.AHRS;
 
 
@@ -27,9 +29,11 @@ public class GyroTurning implements PIDOutput {
     double turnRate;
     OI.ControlProfile controlProfile;
     Drive drive = Drive.getInstance();
+    GyroTurning angle = new GyroTurning();
     
-    
-    public void init() {
+    public GyroTurning() {
+	}
+	public void init() {
         gyro = new AHRS(SPI.Port.kMXP);
         gyro.setName("Gyro", "Angle");
         turnController = new PIDController(0.03, 0, 0.05, gyro, this);
@@ -43,7 +47,11 @@ public class GyroTurning implements PIDOutput {
         turnController.enable();
         gyro.reset();
     }
-    public void run() {
+    public void turn(double Setpoint) {
+        turnController.setSetpoint(Setpoint);
+
+    }
+    public double run() {
         turnController.setP(SmartDashboard.getNumber("TurnP", turnController.getP()));
         turnController.setI(SmartDashboard.getNumber("TurnI", turnController.getI()));
         turnController.setD(SmartDashboard.getNumber("TurnD", turnController.getD()));
@@ -56,22 +64,10 @@ public class GyroTurning implements PIDOutput {
         double MotorSpeed = SmartDashboard.getNumber("MotorSpeed", drive.FL.get());
         System.out.println(MotorSpeed);
         SmartDashboard.putNumber("MotorSpeed", MotorSpeed);
-        if (OI.ControlProfile.driver.getYButtonReleased()) {
-            turnController.setSetpoint(0);
-        }
-        if (OI.ControlProfile.driver.getBButtonReleased()) {
-            turnController.setSetpoint(90);
-        }
-        if (OI.ControlProfile.driver.getAButtonReleased()) {
-            turnController.setSetpoint(180);
-        }
-        if (OI.ControlProfile.driver.getXButtonReleased()) {
-            turnController.setSetpoint(-90);
-        }
         System.out.println("SetpointL " + turnController.getSetpoint());
         System.out.println("turn rate: " + turnRate);
         
-        Drive.getInstance().driveCartesian(0, 0, turnRate);
+        return turnRate;
     }
 
     //Scale the angle input between -180 and 180
@@ -81,4 +77,6 @@ public class GyroTurning implements PIDOutput {
     public void pidWrite(double output) {
         turnRate = output;
       }
+	public void setName(String string, String string2) {
+	}
 }
