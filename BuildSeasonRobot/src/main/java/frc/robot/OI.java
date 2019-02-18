@@ -3,6 +3,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
+import frc.procedure.GyroTurning;
 
 public class OI {
     // Administrator, DriveTrials, Competition
@@ -145,6 +146,7 @@ public class OI {
 
         JoystickButton wheelJackOutButton = new JoystickButton(driver, 4);
         JoystickButton wheelJackInButton = new JoystickButton(driver, 6);
+        GyroTurning gyro = new GyroTurning();
 
         @Override
         public double getHorizontalDriveSpeed() {
@@ -160,6 +162,14 @@ public class OI {
 
         @Override
         public double getRotationalDriveSpeed() {
+            if (OI.ControlProfile.driver.getStickButtonReleased(Hand.kLeft)) {
+                gyro.turn(-29.75f);
+                return gyro.run();
+            }
+            if (OI.ControlProfile.driver.getStickButtonReleased(Hand.kRight)) {
+                gyro.turn(-90);
+                return gyro.run();
+            }
             return driver.getX(Hand.kRight);
         }
 

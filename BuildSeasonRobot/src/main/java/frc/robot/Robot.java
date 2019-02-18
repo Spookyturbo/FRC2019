@@ -12,6 +12,7 @@ import frc.component.Intake;
 import frc.component.Jacks;
 import frc.component.Wrist;
 import frc.procedure.CameraAlign;
+import frc.procedure.GyroTurning;
 import frc.util.Component;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -35,8 +36,7 @@ import com.kauailabs.navx.frc.AHRS;
 public class Robot extends TimedRobot implements PIDOutput {
     ArrayList<Component> components = new ArrayList<>();
     // Xbox Control
-    AHRS gyro;
-
+    GyroTurning gyro = new GyroTurning();
     CameraAlign cameraAlign = new CameraAlign();
 
     Encoder armEncoder = new Encoder(8, 9, false, EncodingType.k4X);
@@ -96,17 +96,9 @@ public class Robot extends TimedRobot implements PIDOutput {
         m_chooser.addOption("Admin", OI.ADMIN_PROFILE);
 
         SmartDashboard.putData("Driver Mode", m_chooser);
-
+    }
         // If the gyro is not plugged in this can throw an error, make sure it doesn't
         // crash the robot
-        try {
-            gyro = new AHRS(SPI.Port.kMXP);
-            gyro.setName("Gyro", "Angle");
-            LiveWindow.add(gyro);
-        } catch (RuntimeException e) {
-            DriverStation.reportError("Error instantiating navX MXP:  " + e.getMessage(), true);
-        }
-    }
 
     /**
      * This function is called every robot packet, no matter the mode. Use this for
@@ -174,7 +166,6 @@ public class Robot extends TimedRobot implements PIDOutput {
      */
     @Override
     public void testPeriodic() {
-
     }
 
     public void updateAllComponents() {
