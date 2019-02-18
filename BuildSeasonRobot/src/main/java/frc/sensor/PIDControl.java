@@ -71,6 +71,7 @@ public class PIDControl extends SendableBase {
     public void reset() {
         this.totalError = 0;
         this.previousError = 0;
+        this.error = 0;
     }
 
     public void setPID(double p, double i, double d) {
@@ -200,8 +201,9 @@ public class PIDControl extends SendableBase {
     // Uses reading given and feedforward term to determine speed based off error
     public double calculate(double input, double feedForward) {
         double error = setpoint - input;
-        //Scale the error
-        error *= 1 / (maxInput - minInput)
+
+        //Scale/normalize the error in between -1 to 1
+        error *= 1 / (maxInput - minInput);
 
         double derivativeError = (error - previousError) / deltaTime;
         double integralError;
