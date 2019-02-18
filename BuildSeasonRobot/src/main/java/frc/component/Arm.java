@@ -31,10 +31,10 @@ public class Arm implements Component, PIDOutput {
 
     // Feedback
     Encoder armEncoder = new Encoder(RobotMap.Encoders.armA, RobotMap.Encoders.armB, false, EncodingType.k4X);
-    // PIDController armPID = new PIDController(0.02, 0.001, 0.2, armEncoder, this);
+    PIDController armPID = new PIDController(0.02, 0.001, 0.2, armEncoder, this);
 
     // Control Profiling
-    PIDControl armPID = new PIDControl(1, 0.01, 0.01);
+   // PIDControl armPID = new PIDControl(1, 0.01, 0.01);
     boolean closedLoop = false;
     double feedForward = 0.12f;
 
@@ -57,11 +57,11 @@ public class Arm implements Component, PIDOutput {
         armEncoder.reset();
         armEncoder.setName("Encoder", "Arm");
         armPID.setName("Gyro", "ArmPID");
-        armPID.initSmartDashboard("Arm");
+        //armPID.initSmartDashboard("Arm");
 
-        // SmartDashboard.putNumber("armP", armPID.getP());
-        // SmartDashboard.putNumber("armI", armPID.getI());
-        // SmartDashboard.putNumber("armD", armPID.getD());
+         SmartDashboard.putNumber("armP", armPID.getP());
+         SmartDashboard.putNumber("armI", armPID.getI());
+         SmartDashboard.putNumber("armD", armPID.getD());
 
         LiveWindow.add(armPID);
         LiveWindow.add(armEncoder);
@@ -72,15 +72,15 @@ public class Arm implements Component, PIDOutput {
 
         armPID.setInputRange(ARM_MIN, ARM_MAX);
         armPID.setOutputRange(-0.5, 0.5);
-        // armPID.setContinuous(false);
+         armPID.setContinuous(false);
         armPID.setSetpoint(ARM_MIN);
-        armPID.setTolerance(1.5);
-        // armPID.setAbsoluteTolerance(1.5);
+        //armPID.setTolerance(1.5);
+        armPID.setAbsoluteTolerance(1.5);
         // I can't contribute more then 0.2f speed in either direction
-        armPID.setMaxIContribution(0.2);
+        //armPID.setMaxIContribution(0.2);
         // Total error won't start changing until less then 5 difference in error
         // between run loops
-        armPID.setIKickInRate(2);
+        //armPID.setIKickInRate(2);
         // Just here to remove the public constructor
     }
 
@@ -112,23 +112,24 @@ public class Arm implements Component, PIDOutput {
         System.out.println("Speed of arm: " + mSpeed);
         System.out.println("Arm encoder: " + armEncoder.get());
         System.out.println("At setpoint: " + armPID.onTarget());
-        // if(armPID.onTarget() || armPID.getError() > 5) {
-        //     armPID.setI(0);
-        // }
-        // else {
-        //     armPID.setI(0.001);
-        // }
-        // Lower limit switch will be the 0 position for the encoder
+        System.out.println("Perod: " + armEncoder.getPeriod());
+        if(armPID.onTarget()) {
+            armPID.setI(0);
+        }
+        else {
+            armPID.setI(0.001);
+        }
+        //Lower limit switch will be the 0 position for the encoder
         if (limitLower.get()) {
             armEncoder.reset();
         }
 
         if(closedLoop) {
             //Get the degrees from the min that the arm is currently at and the adds the MIN
-            double armAngle = getNormalizedEncoder() * (ANGLE_MAX - ANGLE_MIN) + ANGLE_MIN;
+            //double armAngle = getNormalizedEncoder() * (ANGLE_MAX - ANGLE_MIN) + ANGLE_MIN;
 
             //Use the PID loop using the current feedback device, as well as the feedforward term A*cos(theta)
-            mSpeed = armPID.calculate(armEncoder.get(), feedForward * Math.cos(Math.toRadians(armAngle)));
+           // mSpeed = armPID.calculate(armEncoder.get(), feedForward);
         }
 
         armMotor.set(mSpeed);
@@ -158,7 +159,7 @@ public class Arm implements Component, PIDOutput {
     // Retrieve result from FRC PIDController
     @Override
     public void pidWrite(double output) {
-        // mSpeed = output + Math.copySign(minSpeed, output);
+         mSpeed = output + Math.copySign(feedForward, output);
     }
 
     public void enablePID() {
@@ -166,13 +167,15 @@ public class Arm implements Component, PIDOutput {
         // armPID.setP(SmartDashboard.getNumber("armP", armPID.getP()));
         // armPID.setI(SmartDashboard.getNumber("armI", armPID.getI()));
         // armPID.setD(SmartDashboard.getNumber("armD", armPID.getD()));
-        closedLoop = true;
-        // armPID.enable();
+        //closedLoop = true;
+        //armPID.updateFromSmartDashboard("Arm");
+        armPID.reset();
+        armPID.enable();
     }
 
     public void disablePID() {
-        closedLoop = false;
-        // armPID.disable();
+        //closedLoop = false;
+         armPID.disable();
     }
 
     // Sets the position in encoder units to go to with the arm
@@ -187,8 +190,8 @@ public class Arm implements Component, PIDOutput {
 
     // Currently using PID or not
     public boolean isPIDEnabled() {
-        return closedLoop;
-        // return armPID.isEnabled();
+        //return closedLoop;
+        return armPID.isEnabled();
     }
 
     //Returns the encoder scaled from 0-1 using the min and max height for it
