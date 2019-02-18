@@ -7,6 +7,8 @@
 
 package frc.sensor;
 
+import java.util.ArrayList;
+
 import edu.wpi.first.wpilibj.SendableBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -24,6 +26,9 @@ public class PIDControl extends SendableBase {
 
     // Storing all error for use and reporting
     private double error;
+    //Used to avoid situations were loop runs too fast and derivative returns as 0
+    private double maxPreviousErrors = 5;
+    private ArrayList<Double> previousErrors = new ArrayList<>();
     private double previousError;
     private double totalError;
     public boolean acumulateError = true;
@@ -73,6 +78,7 @@ public class PIDControl extends SendableBase {
         this.totalError = 0;
         this.previousError = 0;
         this.error = 0;
+        previousErrors.clear();
     }
 
     public void setPID(double p, double i, double d) {
@@ -203,14 +209,28 @@ public class PIDControl extends SendableBase {
     public double calculate(double input, double feedForward) {
         error = setpoint - input;
 
-        double derivativeError = (error - previousError) / deltaTime;
+        double deltaError = error - previousError;
+
+        previousErrors.add(deltaError);
+
+        if(previousErrors.size() >= maxPreviousErrors) {
+            previousErrors.remove(0);
+        }
+
+        double totalChange = 0;
+        for(double n : previousErrors) {
+            totalChange += n;
+        }
+
+        double derivativeError = totalChange / (deltaTime * previousErrors.size());
         double integralError;
+
         System.out.println("Derivative error: " + derivativeError + " I rate: " + integralKickInRate + " change in error: " + (error - previousError));
         //Change is small enough to warrant start using the integral or integralKickInRate is not used
         if(Math.abs(derivativeError) < integralKickInRate || integralKickInRate == 0) {
             //Update the integral/total error
             if(maxTotalError == 0 || totalError < maxTotalError) {
-                if(acumulateError) {
+                if(acumulateError && !onTarget()) {
                     totalError += error;
                 }
             }

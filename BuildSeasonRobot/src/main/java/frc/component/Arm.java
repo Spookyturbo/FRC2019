@@ -33,7 +33,7 @@ public class Arm implements Component {
     Encoder armEncoder = new Encoder(RobotMap.Encoders.armA, RobotMap.Encoders.armB, false, EncodingType.k4X);
 
     // Control Profiling
-    PIDControl armPID = new PIDControl(0.02, 0.002, 0, 0);
+    PIDControl armPID = new PIDControl(0.02, 0.001, 0.001, 0);
     boolean closedLoop = false;
     double feedForward = 0.12f;
 
@@ -73,7 +73,7 @@ public class Arm implements Component {
         //armPID.setMaxIContribution(0.2);
         // Total error won't start changing until less then 5 difference in error
         // between run loops
-        //armPID.setIKickInRate(2);
+        armPID.setIKickInRate(5);
         // Just here to remove the public constructor
     }
 
@@ -117,12 +117,12 @@ public class Arm implements Component {
             System.out.println("Current error: " + armPID.getError());
             System.out.println("Current feed forward: " + feedForward);
             //Use the PID loop using the current feedback device, as well as the feedforward term A*cos(theta)
-            if(Math.abs(mSpeed) > 0.2f) {
-                armPID.acumulateError = false;
-            }
-            else {
-                armPID.acumulateError = true;
-            }
+            // if(Math.abs(mSpeed) > 0.2f) {
+            //     armPID.acumulateError = false;
+            // }
+            // else {
+            //     armPID.acumulateError = true;
+            // }
             mSpeed = armPID.calculate(armEncoder.get(), feedForward);
         }
 
@@ -131,21 +131,25 @@ public class Arm implements Component {
 
     //Set the arm to the high position for placing hatches on the rocket
     public void setHigh() {
+        armPID.reset();
         setSetpoint(ARM_HIGH);
     }
 
     //Set the arm to the mid position for placing hatches on the rocket
     public void setMiddle() {
+        armPID.reset();
         setSetpoint(ARM_MIDDLE);
     }
 
     //Set the arm to the low position for placing hatches on the rocket
     public void setLow() {
+        armPID.reset();
         setSetpoint(ARM_LOW);
     }
 
     // Will move the arm down until it presses the limit switch it rezeroes
     public void setDown() {
+        armPID.reset();
         // Still need to add moving down until zeroing and also that will need a timeout
         setSetpoint(0);
     }
