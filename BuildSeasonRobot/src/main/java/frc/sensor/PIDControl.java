@@ -26,6 +26,7 @@ public class PIDControl extends SendableBase {
     private double error;
     private double previousError;
     private double totalError;
+    public boolean acumulateError = true;
 
     // The max abs(value) the total error can reach
     private double maxTotalError;
@@ -185,7 +186,7 @@ public class PIDControl extends SendableBase {
     //Set the rate the derivative error must be less than
     //for the integral to start ramping up
     public void setIKickInRate(double maxDeltaError) {
-        integralKickInRate = Math.abs(maxDeltaError / deltaTime);
+        integralKickInRate = Math.abs(maxDeltaError);
     }
 
     // Returns the total error recorded by the integral term
@@ -200,19 +201,18 @@ public class PIDControl extends SendableBase {
 
     // Uses reading given and feedforward term to determine speed based off error
     public double calculate(double input, double feedForward) {
-        double error = setpoint - input;
-
-        //Scale/normalize the error in between -1 to 1
-        error *= 1 / (maxInput - minInput);
+        error = setpoint - input;
 
         double derivativeError = (error - previousError) / deltaTime;
         double integralError;
-
+        System.out.println("Derivative error: " + derivativeError + " I rate: " + integralKickInRate + " change in error: " + (error - previousError));
         //Change is small enough to warrant start using the integral or integralKickInRate is not used
         if(Math.abs(derivativeError) < integralKickInRate || integralKickInRate == 0) {
             //Update the integral/total error
             if(maxTotalError == 0 || totalError < maxTotalError) {
-                totalError += error;
+                if(acumulateError) {
+                    totalError += error;
+                }
             }
         }
 
@@ -221,7 +221,7 @@ public class PIDControl extends SendableBase {
         //Compute the motor speed
         double output = kF * feedForward + kP * error + kI * integralError + kD * derivativeError;
         output = clamp(output, minOutput, maxOutput);
-
+        previousError = error;
         return output;
     }
 
