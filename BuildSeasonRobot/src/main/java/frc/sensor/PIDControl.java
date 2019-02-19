@@ -213,7 +213,8 @@ public class PIDControl extends SendableBase {
 
         previousErrors.add(deltaError);
 
-        if(previousErrors.size() >= maxPreviousErrors) {
+        if(previousErrors.size() > maxPreviousErrors) {
+            //Double check to make sure this is removing at index and not where [i] = 0
             previousErrors.remove(0);
         }
 

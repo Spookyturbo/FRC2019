@@ -191,6 +191,10 @@ public class Arm implements Component {
         armEncoder.reset();
     }
 
+    public double getEncoder() {
+        return armEncoder.get();
+    }
+
     // Handle the singleton instance
     public static Arm getInstance() {
 

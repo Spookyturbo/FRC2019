@@ -73,11 +73,34 @@ public class OI {
 
         @Override
         public double getWristSpeed() {
-            return -assistant.getY(Hand.kRight) / 0.6;
+            return -assistant.getRawAxis(3) / 0.6f;
+            //return -assistant.getY(Hand.kRight) / 0.6;
         }
 
         @Override
         public double getArmSpeed() {
+            Arm arm = Arm.getInstance();
+            double armSpeed = 0;
+
+            if (arm.isPIDEnabled()) {
+                if(assistant.getAButton()) {
+                    arm.setSetpoint(Arm.ARM_LOW);
+                }
+                else if(assistant.getXButton()) {
+                    arm.setSetpoint(Arm.ARM_MIDDLE);
+                }
+                else if(assistant.getYButton()) {
+                    arm.setSetpoint(Arm.ARM_HIGH);
+                }
+                else if(assistant.getBButton()) {
+                    arm.setSetpoint(Arm.ARM_MIN);
+                }
+
+                // Speed is set in arm via PID
+                armSpeed = arm.getSpeed();
+                return armSpeed;
+            }
+
             return -assistant.getY(Hand.kLeft) * 0.65f;
         }
 
@@ -188,27 +211,27 @@ public class OI {
                 double setPoint = Arm.getInstance().getSetpoint();
                 if (driver.getBButtonPressed()) { // Up
                     if (setPoint < 0) {
-                        arm.setSetpoint(0);;
+                        arm.setSetpoint(0);
+                        ;
                     } else if (setPoint < Arm.ARM_LOW) {
                         arm.setLow();
                     } else if (setPoint < Arm.ARM_MIDDLE) {
                         arm.setMiddle();
                     } else if (setPoint < Arm.ARM_HIGH) {
-                        arm.setHigh();;
+                        arm.setHigh();
+                        ;
                     }
                 } else if (driver.getAButtonPressed()) { // Down
-                    if(setPoint > Arm.ARM_HIGH) {
+                    if (setPoint > Arm.ARM_HIGH) {
                         arm.setHigh();
-                    }
-                    else if (setPoint > Arm.ARM_MIDDLE) {
+                    } else if (setPoint > Arm.ARM_MIDDLE) {
                         arm.setMiddle();
                     } else if (setPoint > Arm.ARM_LOW) {
                         arm.setLow();
                     } else if (setPoint > 0) {
                         arm.setSetpoint(0);
                     }
-                }
-                else if(driver.getStickButtonPressed(Hand.kRight)) {
+                } else if (driver.getStickButtonPressed(Hand.kRight)) {
                     arm.setSetpoint(arm.getSetpoint() - 6);
                 }
 

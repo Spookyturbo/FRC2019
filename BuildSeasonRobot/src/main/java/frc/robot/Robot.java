@@ -155,8 +155,8 @@ public class Robot extends TimedRobot {
                 controlProfile.getRotationalDriveSpeed());
 
         if (OI.ControlProfile.driver.getRawButtonPressed(8)) {
-            arm.resetEncoder();
-            arm.setSetpoint(0);
+            //arm.resetEncoder();
+            arm.setSetpoint(arm.getEncoder());
             if (arm.isPIDEnabled()) {
                 arm.disablePID();
             } else {
