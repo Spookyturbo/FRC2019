@@ -22,7 +22,7 @@ public class CameraAlign {
     private Drive drive = Drive.getInstance();
 
     PIDControl distanceController = new PIDControl(0.1);
-    PIDControl strafingController = new PIDControl(0.1);
+    PIDControl strafingController = new PIDControl(0.1, 0.001);
     PIDControl rotationController = new PIDControl(0.009);
 
     public CameraAlign() {

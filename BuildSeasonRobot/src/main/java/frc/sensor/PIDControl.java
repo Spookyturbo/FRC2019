@@ -217,7 +217,7 @@ public class PIDControl extends SendableBase {
             //Double check to make sure this is removing at index and not where [i] = 0
             previousErrors.remove(0);
         }
-        System.out.println("previous errors size: " + previousErrors.size());
+        
         double totalChange = 0;
         for(double n : previousErrors) {
             totalChange += n;

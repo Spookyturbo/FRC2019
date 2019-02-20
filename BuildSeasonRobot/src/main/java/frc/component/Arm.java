@@ -37,14 +37,14 @@ public class Arm implements Component {
     Encoder armEncoder = new Encoder(RobotMap.Encoders.armA, RobotMap.Encoders.armB, false, EncodingType.k4X);
 
     // Control Profiling
-    PIDControl armPID = new PIDControl(0.02, 0.001, 0.001, 0);
+    PIDControl armPID = new PIDControl(0.06, 0.001, 0.03, 0);
     boolean closedLoop = false;
     double feedForward = 0.12f;
 
     // Encoder constants
     public static final double ARM_HIGH = 63.75f;
-    public static final double ARM_MIDDLE = 37f;
-    public static final double ARM_LOW = 11f;
+    public static final double ARM_MIDDLE = 35.75f;
+    public static final double ARM_LOW = 9.75f;
     public static final double ARM_MIN = 0f;
     public static final double ARM_MAX = 70f;
 
@@ -60,6 +60,11 @@ public class Arm implements Component {
         armEncoder.reset();
         armPID.initSmartDashboard("Arm");
 
+        SmartDashboard.putNumber("DownP", 0.06);
+        SmartDashboard.putNumber("DownI", 0);
+        SmartDashboard.putNumber("DownD", 0.03);
+
+        LiveWindow.add(armPID);
         armMotor.setInverted(true);
 
         armPID.setInputRange(ARM_MIN, ARM_MAX);
@@ -124,24 +129,43 @@ public class Arm implements Component {
     //Set the arm to the high position for placing hatches on the rocket
     public void setHigh() {
         armPID.reset();
+        if(armPID.getSetpoint() < ARM_HIGH) {
+            increasingPID();
+        }
         setSetpoint(ARM_HIGH);
     }
 
     //Set the arm to the mid position for placing hatches on the rocket
     public void setMiddle() {
         armPID.reset();
+        if(armPID.getSetpoint() < ARM_MIDDLE) {
+            increasingPID();
+        }
+        else if(armPID.getSetpoint() > ARM_MIDDLE) {
+            decreasingPID();
+        }
+
         setSetpoint(ARM_MIDDLE);
     }
 
     //Set the arm to the low position for placing hatches on the rocket
     public void setLow() {
         armPID.reset();
+        if(armPID.getSetpoint() < ARM_LOW) {
+            increasingPID();
+        }
+        else if(armPID.getSetpoint() > ARM_LOW) {
+            decreasingPID();
+        }
         setSetpoint(ARM_LOW);
     }
 
     // Will move the arm down until it presses the limit switch it rezeroes
     public void setDown() {
         armPID.reset();
+        if(armPID.getSetpoint() > ARM_MIN) {
+            decreasingPID();
+        }
         // Still need to add moving down until zeroing and also that will need a timeout
         setSetpoint(ARM_MIN);
     }
@@ -172,6 +196,17 @@ public class Arm implements Component {
     // Currently using PID or not
     public boolean isPIDEnabled() {
         return closedLoop;
+    }
+
+    //Set to these constants when the arm is going down
+    private void decreasingPID() {
+        //0.01, 0.0001, 0.01
+        armPID.setPID(0.01, 0.0001, 0.01);
+    }
+
+    //Set to these constants when the arm is going up
+    private void increasingPID() {
+        armPID.setPID(0.06, 0, 0.03);
     }
 
     //Returns the encoder scaled from 0-1 using the min and max height for it
