@@ -73,8 +73,8 @@ public class OI {
 
         @Override
         public double getWristSpeed() {
-            return -assistant.getRawAxis(3) / 0.6f;
-            //return -assistant.getY(Hand.kRight) / 0.6;
+            //return -assistant.getRawAxis(3) / 0.6f;
+            return -assistant.getY(Hand.kRight) / 0.6;
         }
 
         @Override
@@ -117,14 +117,16 @@ public class OI {
 
         @Override
         public double getRearJackSpeed() {
-            int pov = assistant.getPOV();
-            if (pov == 0 || pov == 45 || pov == 315) {
-                return 1;
-            } else if (pov == 180 || pov == 225 || pov == 135) {
-                return -1;
-            }
+            //int pov = assistant.getPOV();
+            // if (pov == 0 || pov == 45 || pov == 315) {
+            //     return 1;
+            // } else if (pov == 180 || pov == 225 || pov == 135) {
+            //     return -1;
+            // }
 
-            return 0;
+            double speed = assistant.getRawAxis(2) - assistant.getRawAxis(3);
+
+            return speed;
         }
 
         @Override
@@ -142,9 +144,9 @@ public class OI {
         @Override
         public double getIntakeSpeed() {
             if (intakeOutButton.get()) {
-                return 1;
+                return 0.5;
             } else if (intakeInButton.get()) {
-                return -1;
+                return -0.5;
             }
 
             return 0;

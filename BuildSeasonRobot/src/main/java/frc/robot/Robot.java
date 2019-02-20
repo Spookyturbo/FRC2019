@@ -38,10 +38,6 @@ public class Robot extends TimedRobot {
 
     CameraAlign cameraAlign;
 
-    Encoder leftEncoder = new Encoder(12, 13, false, EncodingType.k4X);
-    Encoder rightEncoder = new Encoder(10, 11, false, EncodingType.k4X);
-    // Encoder rightEncoder = new Encoder(2, 3);
-
     OI.ControlProfile controlProfile;
 
     Drive drive;
@@ -64,9 +60,6 @@ public class Robot extends TimedRobot {
         cameraAlign = new CameraAlign();
         // Init here, should be overwritten in telopinit
         controlProfile = OI.getProfile(OI.ADMIN_PROFILE);
-        controlProfile = OI.getProfile(OI.DRIVER_TRIALS_PROFILE);
-        controlProfile = new OI.DriverTrialsProfile();
-        controlProfile = new OI.AdminProfile();
         
         // Store in cleaner variables
         drive = Drive.getInstance();
@@ -83,12 +76,8 @@ public class Robot extends TimedRobot {
 
         drive.invertX(true);
 
-        // Encoder test
-        leftEncoder.setName("Encoder", "Left");
-        rightEncoder.setName("Encoder", "Right");
-
-        LiveWindow.add(leftEncoder);
-        LiveWindow.add(rightEncoder);
+        drive.initDebug();
+        arm.initDebug();
 
         // Put drive profiles on smartDashboard
         m_chooser.setDefaultOption("DriveTrials", OI.DRIVER_TRIALS_PROFILE);
@@ -105,6 +94,8 @@ public class Robot extends TimedRobot {
         } catch (RuntimeException e) {
             DriverStation.reportError("Error instantiating navX MXP:  " + e.getMessage(), true);
         }
+
+        Limelight.getInstance().setLightState(Limelight.LightMode.OFF);
     }
 
     /**
@@ -163,12 +154,7 @@ public class Robot extends TimedRobot {
                 arm.enablePID();
             }
         }
-        OI.DriverTrialsProfile driverTrialsProfile = new OI.DriverTrialsProfile();
-        OI.AdminProfile adminProfile = new OI.AdminProfile();
 
-        OI.ControlProfile profile = new OI.AdminProfile();
-        driverTrialsProfile.getArmSpeed();
-        adminProfile.getArmSpeed();
         if (OI.ControlProfile.driver.getRawButtonPressed(7)) {
             cameraAlign.resetPID();
         } else if (OI.ControlProfile.driver.getRawButton(7)) {

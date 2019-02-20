@@ -217,7 +217,7 @@ public class PIDControl extends SendableBase {
             //Double check to make sure this is removing at index and not where [i] = 0
             previousErrors.remove(0);
         }
-
+        System.out.println("previous errors size: " + previousErrors.size());
         double totalChange = 0;
         for(double n : previousErrors) {
             totalChange += n;
@@ -226,7 +226,6 @@ public class PIDControl extends SendableBase {
         double derivativeError = totalChange / (deltaTime * previousErrors.size());
         double integralError;
 
-        System.out.println("Derivative error: " + derivativeError + " I rate: " + integralKickInRate + " change in error: " + (error - previousError));
         //Change is small enough to warrant start using the integral or integralKickInRate is not used
         if(Math.abs(derivativeError) < integralKickInRate || integralKickInRate == 0) {
             //Update the integral/total error
@@ -276,7 +275,7 @@ public class PIDControl extends SendableBase {
 
     @Override
     public void initSendable(SendableBuilder builder) {
-      builder.setSmartDashboardType("PIDController");
+      builder.setSmartDashboardType("PIDControl");
       builder.setSafeState(this::reset);
       builder.addDoubleProperty("p", this::getP, this::setP);
       builder.addDoubleProperty("i", this::getI, this::setI);

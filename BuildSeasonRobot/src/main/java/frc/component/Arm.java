@@ -14,9 +14,13 @@ import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.shuffleboard.WidgetType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Encoder;
 import frc.util.Component;
+import frc.util.Debug;
 
 //Implement component so that this can be included in the main loop
 public class Arm implements Component {
@@ -54,14 +58,7 @@ public class Arm implements Component {
     private Arm() {
 
         armEncoder.reset();
-        armEncoder.setName("Encoder", "Arm");
-        armPID.setName("Gyro", "ArmPID");
         armPID.initSmartDashboard("Arm");
-
-        LiveWindow.add(armPID);
-        LiveWindow.add(armEncoder);
-        armMotor.setName("Encoder", "ArmMotor");
-        LiveWindow.add(armMotor);
 
         armMotor.setInverted(true);
 
@@ -102,9 +99,6 @@ public class Arm implements Component {
     // Ran at end of every control loop in Robot.java
     @Override
     public void execute() {
-        System.out.println("Speed of arm: " + mSpeed);
-        System.out.println("At setpoint: " + armPID.onTarget());
-        System.out.println("TotalError " + armPID.getTotalError());
         //Lower limit switch will be the 0 position for the encoder
         if (limitLower.get()) {
             armEncoder.reset();
@@ -114,8 +108,6 @@ public class Arm implements Component {
             //Get the degrees from the min that the arm is currently at and the adds the MIN
             double armAngle = getNormalizedEncoder() * (ANGLE_MAX - ANGLE_MIN) + ANGLE_MIN;
             //double currentFeedforward =  Math.copySign(feedForward, armPID.getError());
-            System.out.println("Current error: " + armPID.getError());
-            System.out.println("Current feed forward: " + feedForward);
             //Use the PID loop using the current feedback device, as well as the feedforward term A*cos(theta)
             // if(Math.abs(mSpeed) > 0.2f) {
             //     armPID.acumulateError = false;
@@ -151,7 +143,7 @@ public class Arm implements Component {
     public void setDown() {
         armPID.reset();
         // Still need to add moving down until zeroing and also that will need a timeout
-        setSetpoint(0);
+        setSetpoint(ARM_MIN);
     }
 
     public void enablePID() {
@@ -159,9 +151,11 @@ public class Arm implements Component {
         closedLoop = true;
         armPID.updateFromSmartDashboard("Arm");
         armPID.reset();
+        SmartDashboard.putBoolean("PIDEnabled", true);
     }
 
     public void disablePID() {
+        SmartDashboard.putBoolean("PIDEnabled", false);
         closedLoop = false;
     }
 
@@ -193,6 +187,28 @@ public class Arm implements Component {
 
     public double getEncoder() {
         return armEncoder.get();
+    }
+
+    public void initDebug() {
+        ShuffleboardTab tab = Debug.arm;
+
+        armMotor.setName("Motors", "Arm");
+
+        armEncoder.setName("Encoders", "Arm Height");
+
+        limitLower.setName("Limit Switches", "Lower Limit");
+        limitUpper.setName("Limit Switches", "Upper Limit");
+
+        armPID.setName("PID", "ArmPID");
+
+        tab.add(armMotor);
+        tab.add(armEncoder);
+        tab.add(limitLower)
+            .withWidget(BuiltInWidgets.kBooleanBox);
+        tab.add(limitUpper)
+            .withWidget(BuiltInWidgets.kBooleanBox);
+        tab.add(armPID)
+            .withWidget(BuiltInWidgets.kPIDController);
     }
 
     // Handle the singleton instance

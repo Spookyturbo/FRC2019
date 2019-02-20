@@ -36,7 +36,7 @@ public class Wrist implements Component {
         if (upperLimitSwitch.get()) {
             mSpeed = Math.min(mSpeed, 0);
         } else if (lowerLimitSwitch.get()) {
-            mSpeed = Math.max(mSpeed, 0);
+            //mSpeed = Math.max(mSpeed, 0);
         }
     }
 
