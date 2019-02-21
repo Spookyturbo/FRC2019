@@ -9,18 +9,21 @@ package frc.component;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
+import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.robot.RobotMap;
 import frc.util.Component;
+import frc.util.Debug;
 
 /**
- * Used for driving
- * Inlcudes both singular side tank drive as well
- * as mecanum
+ * Used for driving Inlcudes both singular side tank drive as well as mecanum
  */
 public class Drive implements Component {
     private static Drive instance;
@@ -31,10 +34,13 @@ public class Drive implements Component {
     private WPI_VictorSPX BR;
 
     private MecanumDrive mecanumDrive;
-    //private DifferentialDrive tankDrive;
+    // private DifferentialDrive tankDrive;
 
     private SpeedControllerGroup leftMotors;
     private SpeedControllerGroup rightMotors;
+
+    private Encoder leftEncoder = new Encoder(12, 13, false, EncodingType.k4X);
+    private Encoder rightEncoder = new Encoder(10, 11, false, EncodingType.k4X);
 
     private boolean mecanum = false;
     private boolean invertX = false;
@@ -52,10 +58,10 @@ public class Drive implements Component {
         rightMotors.setInverted(true);
 
         mecanumDrive = new MecanumDrive(FL, BL, FR, BR);
-        //tankDrive = new DifferentialDrive(leftMotors, rightMotors);
+        // tankDrive = new DifferentialDrive(leftMotors, rightMotors);
     }
 
-    //Mecanum Drive
+    // Mecanum Drive
     public void driveCartesian(double ySpeed, double xSpeed, double rotate) {
         mecanum = true;
         this.ySpeed = ySpeed;
@@ -63,23 +69,22 @@ public class Drive implements Component {
         this.rotate = rotate;
     }
 
-    //Tank Drive
+    // Tank Drive
     public void tankDrive(double leftSpeed, double rightSpeed) {
         mecanum = false;
         xSpeed = leftSpeed;
         ySpeed = rightSpeed;
     }
 
-    //Ran at the end of teleopPeriodic and autonomousPeriodic
+    // Ran at the end of teleopPeriodic and autonomousPeriodic
     @Override
     public void execute() {
-        if(mecanum) {
+        if (mecanum) {
             mecanumDrive.driveCartesian(ySpeed, xSpeed, rotate);
-            
-        }
-        else {
-            //X = left Y = right
-            //tankDrive.tankDrive(xSpeed, ySpeed);
+
+        } else {
+            // X = left Y = right
+            // tankDrive.tankDrive(xSpeed, ySpeed);
         }
     }
 
@@ -87,7 +92,34 @@ public class Drive implements Component {
         invertX = b;
     }
 
-    //Debug the groups and individual motors
+    public void initDebug() {
+        ShuffleboardTab tab = Debug.drive;
+        FL.setName("Motors", "Front Left");
+        BL.setName("Motors", "Back Left");
+        FR.setName("Motors", "Front Right");
+        BR.setName("Motors", "Back Right");
+
+        mecanumDrive.setName("Drive System", "Mecanum");
+
+        leftEncoder.setName("Encoder", "Left");
+        rightEncoder.setName("Encoder", "Right");
+
+        tab.add(FL);
+        tab.add(FR);
+        tab.add(BL);
+        tab.add(BR);
+
+        tab.add(mecanumDrive);
+
+        tab.add(leftEncoder);
+        tab.add(rightEncoder);
+    }
+
+    public void updateDebug() {
+        
+    }
+
+    // Debug the groups and individual motors
     public void debugMotors() {
         leftMotors.setName("DriveMotor", "Left Motors");
         rightMotors.setName("DriveMotor", "Right Motors");
@@ -105,27 +137,27 @@ public class Drive implements Component {
         LiveWindow.add(BR);
     }
 
-    //Debug the mecanum drive
+    // Debug the mecanum drive
     public void debugMecanum() {
-        mecanumDrive.setName("Drive System", "Mecanum");
+        Debug.drive.add(mecanumDrive);
         LiveWindow.add(mecanumDrive);
     }
 
-    //Debug the tank drive
-    //public void debugTank() {
-    //    tankDrive.setName("Drive System", "Tank");
-    //    LiveWindow.add(tankDrive);
-    //}
+    // Debug the tank drive
+    // public void debugTank() {
+    // tankDrive.setName("Drive System", "Tank");
+    // LiveWindow.add(tankDrive);
+    // }
 
-    //Runs all of the debug software
+    // Runs all of the debug software
     public void debugAll() {
         debugMotors();
         debugMecanum();
-        //debugTank();
+        // debugTank();
     }
 
     public static Drive getInstance() {
-        if(instance == null) {
+        if (instance == null) {
             instance = new Drive();
         }
         return instance;

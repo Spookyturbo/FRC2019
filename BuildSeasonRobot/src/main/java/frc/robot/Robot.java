@@ -2,6 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
+import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -32,11 +33,6 @@ public class Robot extends TimedRobot {
 
     CameraAlign cameraAlign;
 
-    Encoder armEncoder = new Encoder(8, 9, false, EncodingType.k4X);
-    Encoder leftEncoder = new Encoder(12, 13, false, EncodingType.k4X);
-    Encoder rightEncoder = new Encoder(10, 11, false, EncodingType.k4X);
-    // Encoder rightEncoder = new Encoder(2, 3);
-
     OI.ControlProfile controlProfile;
 
     Drive drive;
@@ -55,11 +51,11 @@ public class Robot extends TimedRobot {
     @Override
     public void robotInit() {
         CameraServer.getInstance().startAutomaticCapture();
-        
+
         cameraAlign = new CameraAlign();
         // Init here, should be overwritten in telopinit
         controlProfile = OI.getProfile(OI.ADMIN_PROFILE);
-
+        
         // Store in cleaner variables
         drive = Drive.getInstance();
         jacks = Jacks.getInstance();
@@ -75,14 +71,8 @@ public class Robot extends TimedRobot {
 
         drive.invertX(true);
 
-        // Encoder test
-        armEncoder.setName("Encoder", "Arm");
-        leftEncoder.setName("Encoder", "Left");
-        rightEncoder.setName("Encoder", "Right");
-
-        LiveWindow.add(armEncoder);
-        LiveWindow.add(leftEncoder);
-        LiveWindow.add(rightEncoder);
+        drive.initDebug();
+        arm.initDebug();
 
         // Put drive profiles on smartDashboard
         m_chooser.setDefaultOption("DriveTrials", OI.DRIVER_TRIALS_PROFILE);
@@ -95,10 +85,12 @@ public class Robot extends TimedRobot {
         try {
             gyro = new AHRS(SPI.Port.kMXP);
             gyro.setName("Gyro", "Angle");
-            LiveWindow.add(gyro);
+            // LiveWindow.add(gyro);
         } catch (RuntimeException e) {
             DriverStation.reportError("Error instantiating navX MXP:  " + e.getMessage(), true);
         }
+
+        Limelight.getInstance().setLightState(Limelight.LightMode.OFF);
     }
 
     /**
@@ -136,6 +128,7 @@ public class Robot extends TimedRobot {
             controlProfile = OI.getProfile(m_driverSelected);
         }
         Limelight.getInstance().setPipeline(1);
+        Limelight.getInstance().setLightState(Limelight.LightMode.ON);
     }
 
     /**
@@ -147,11 +140,22 @@ public class Robot extends TimedRobot {
         drive.driveCartesian(controlProfile.getHorizontalDriveSpeed(), controlProfile.getVerticalDriveSpeed(),
                 controlProfile.getRotationalDriveSpeed());
 
+        if (OI.ControlProfile.driver.getRawButtonPressed(8)) {
+            //arm.resetEncoder();
+            arm.setSetpoint(arm.getEncoder());
+            if (arm.isPIDEnabled()) {
+                arm.disablePID();
+            } else {
+                arm.enablePID();
+            }
+        }
+
         if (OI.ControlProfile.driver.getRawButtonPressed(7)) {
             cameraAlign.resetPID();
         } else if (OI.ControlProfile.driver.getRawButton(7)) {
             cameraAlign.run();
         }
+
         // Arm Control
         arm.setSpeed(controlProfile.getArmSpeed());
         // Intake control
@@ -162,7 +166,7 @@ public class Robot extends TimedRobot {
         jacks.setWheelSpeed(controlProfile.getJackWheelSpeed());
         // Wrist control
         wrist.setSpeed(controlProfile.getWristSpeed());
-        
+
         updateAllComponents();
     }
 

@@ -15,7 +15,6 @@ import edu.wpi.first.networktables.NetworkTableEntry;
  * Add your docs here.
  */
 public class Limelight {
-
     public enum LightMode {
         DEFAULT(0), OFF(1), BLINK(2), ON(3);
 
