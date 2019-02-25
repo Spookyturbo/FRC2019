@@ -18,6 +18,8 @@ import frc.sensor.PIDControl;
  */
 public class CameraAlign {
 
+    private static CameraAlign instance;
+
     private Limelight camera = Limelight.getInstance();
     private Drive drive = Drive.getInstance();
 
@@ -25,7 +27,7 @@ public class CameraAlign {
     PIDControl strafingController = new PIDControl(0.1, 0.001);
     PIDControl rotationController = new PIDControl(0.009);
 
-    public CameraAlign() {
+    private CameraAlign() {
         distanceController.setOutputRange(-0.5, 0.5);
         strafingController.setOutputRange(-0.5, 0.5);
         rotationController.setOutputRange(-0.5, 0.5);
@@ -72,5 +74,13 @@ public class CameraAlign {
         distanceController.reset();
         strafingController.reset();
         rotationController.reset();
+    }
+
+    public static CameraAlign getInstance() {
+        if(instance == null) {
+            instance = new CameraAlign();
+        }
+
+        return instance;
     }
 }

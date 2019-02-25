@@ -36,9 +36,7 @@ public class Robot extends TimedRobot {
     // Xbox Control
     AHRS gyro;
 
-    CameraAlign cameraAlign;
-
-    OI.ControlProfile controlProfile;
+    OI.DriverProfile controlProfile;
 
     Drive drive;
     Jacks jacks;
@@ -57,7 +55,6 @@ public class Robot extends TimedRobot {
     public void robotInit() {
         CameraServer.getInstance().startAutomaticCapture();
 
-        cameraAlign = new CameraAlign();
         // Init here, should be overwritten in telopinit
         controlProfile = OI.getProfile(OI.ADMIN_PROFILE);
         
@@ -80,7 +77,7 @@ public class Robot extends TimedRobot {
         arm.initDebug();
 
         // Put drive profiles on smartDashboard
-        m_chooser.setDefaultOption("DriveTrials", OI.DRIVER_TRIALS_PROFILE);
+        m_chooser.setDefaultOption("DriveTrials", OI.MAIN_DRIVER_PROFILE);
         m_chooser.addOption("Admin", OI.ADMIN_PROFILE);
 
         SmartDashboard.putData("Driver Mode", m_chooser);
@@ -132,6 +129,8 @@ public class Robot extends TimedRobot {
             m_driverSelected = m_chooser.getSelected();
             controlProfile = OI.getProfile(m_driverSelected);
         }
+
+        //Set the camera values
         Limelight.getInstance().setPipeline(1);
         Limelight.getInstance().setLightState(Limelight.LightMode.ON);
     }
@@ -142,35 +141,19 @@ public class Robot extends TimedRobot {
     // leftEncoder = 8,9
     @Override
     public void teleopPeriodic() {
-        drive.driveCartesian(controlProfile.getHorizontalDriveSpeed(), controlProfile.getVerticalDriveSpeed(),
-                controlProfile.getRotationalDriveSpeed());
 
-        if (OI.ControlProfile.driver.getRawButtonPressed(8)) {
-            //arm.resetEncoder();
-            arm.setSetpoint(arm.getEncoder());
-            if (arm.isPIDEnabled()) {
-                arm.disablePID();
-            } else {
-                arm.enablePID();
-            }
-        }
+        controlProfile.drive();
+        controlProfile.cameraDrive();
 
-        if (OI.ControlProfile.driver.getRawButtonPressed(7)) {
-            cameraAlign.resetPID();
-        } else if (OI.ControlProfile.driver.getRawButton(7)) {
-            cameraAlign.run();
-        }
+        controlProfile.controlArm();
+        controlProfile.controlArmPID();
 
-        // Arm Control
-        arm.setSpeed(controlProfile.getArmSpeed());
-        // Intake control
-        intake.setSpeed(controlProfile.getIntakeSpeed());
-        // Jack Control
-        jacks.setFrontSpeed(controlProfile.getFrontJackSpeed());
-        jacks.setRearSpeed(controlProfile.getRearJackSpeed());
-        jacks.setWheelSpeed(controlProfile.getJackWheelSpeed());
-        // Wrist control
-        wrist.setSpeed(controlProfile.getWristSpeed());
+        controlProfile.controlFrontJacks();
+        controlProfile.controlRearJackWheel();
+        controlProfile.controlRearJacks();
+
+        controlProfile.controlWrist();
+        controlProfile.controlIntake();
 
         updateAllComponents();
     }

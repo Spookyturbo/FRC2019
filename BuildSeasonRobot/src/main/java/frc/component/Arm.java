@@ -109,17 +109,12 @@ public class Arm implements Component {
             armEncoder.reset();
         }
 
+        //Closed Loop PIDControl
         if(closedLoop) {
             //Get the degrees from the min that the arm is currently at and the adds the MIN
-            double armAngle = getNormalizedEncoder() * (ANGLE_MAX - ANGLE_MIN) + ANGLE_MIN;
-            //double currentFeedforward =  Math.copySign(feedForward, armPID.getError());
-            //Use the PID loop using the current feedback device, as well as the feedforward term A*cos(theta)
-            // if(Math.abs(mSpeed) > 0.2f) {
-            //     armPID.acumulateError = false;
-            // }
-            // else {
-            //     armPID.acumulateError = true;
-            // }
+            //Possibly work this in as feed forward, does nothing for now
+            //double armAngle = getNormalizedEncoder() * (ANGLE_MAX - ANGLE_MIN) + ANGLE_MIN;
+
             mSpeed = armPID.calculate(armEncoder.get(), feedForward);
         }
 
