@@ -77,7 +77,8 @@ public class Robot extends TimedRobot {
         arm.initDebug();
 
         // Put drive profiles on smartDashboard
-        m_chooser.setDefaultOption("DriveTrials", OI.MAIN_DRIVER_PROFILE);
+        m_chooser.setDefaultOption("Logitech", OI.LOGITECH_CONTROLLER);
+        m_chooser.addOption("Feaven", OI.MAIN_DRIVER_PROFILE);
         m_chooser.addOption("Admin", OI.ADMIN_PROFILE);
 
         SmartDashboard.putData("Driver Mode", m_chooser);

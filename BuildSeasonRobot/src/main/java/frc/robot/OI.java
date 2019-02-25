@@ -14,11 +14,14 @@ public class OI {
     // Administrator, DriveTrials, Competition
     public static final String ADMIN_PROFILE = "Administrator";
     public static final String MAIN_DRIVER_PROFILE = "Feaven";
+    public static final String LOGITECH_CONTROLLER = "Logitech";
 
     // Create and return the profile
     public static DriverProfile getProfile(String profile) {
         switch (profile) {
         default:
+        case LOGITECH_CONTROLLER:
+            return new LogitechProfile();
         case MAIN_DRIVER_PROFILE:
             return new DriverProfile();
         case ADMIN_PROFILE:
@@ -140,6 +143,27 @@ public class OI {
             } else {
                 intake.setSpeed(0);
             }
+        }
+    }
+
+    //---------------------------------------Logitech----------------------------------
+    static class LogitechProfile extends DriverProfile {
+        @Override
+        public void controlWrist() {
+            wrist.setSpeed(-assistant.getRawAxis(3));
+        }
+
+        @Override
+        public void controlRearJacks() {
+            double jacksSpeed = 0;
+            if(assistant.getRawButton(8)) {
+                jacksSpeed = -1;
+            }
+            else if(assistant.getRawButton(7)) {
+                jacksSpeed = 1;
+            }
+
+            jacks.setRearSpeed(jacksSpeed);
         }
     }
 
