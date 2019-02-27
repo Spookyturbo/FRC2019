@@ -239,6 +239,13 @@ public class Arm implements Component {
             .withWidget(BuiltInWidgets.kBooleanBox);
         tab.add(armPID)
             .withWidget(BuiltInWidgets.kPIDController);
+
+        Debug.encoders.add(armEncoder);
+        
+        Debug.limitSwitches.add(limitUpper);
+        Debug.limitSwitches.add(limitLower);
+
+        Debug.motors.add(armMotor);
     }
 
     // Handle the singleton instance

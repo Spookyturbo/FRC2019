@@ -8,7 +8,11 @@
 package frc.component;
 
 import frc.util.Component;
+import frc.util.Debug;
+
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
+
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.robot.RobotMap;
 
 //Implement component so that this can be included in the main loop
@@ -32,6 +36,15 @@ public class Intake implements Component {
     public void execute() {
         intakeMotor.set(mSpeed);
         // Code ran every loop
+    }
+
+    public void initDebug() {
+        ShuffleboardTab tab = Debug.intake;
+        intakeMotor.setName("Motors", "Intake");
+
+        tab.add(intakeMotor);
+
+        Debug.motors.add(intakeMotor);
     }
 
     public static Intake getInstance() {

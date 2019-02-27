@@ -10,8 +10,10 @@ package frc.component;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.robot.RobotMap;
 import frc.util.Component;
+import frc.util.Debug;
 
 //Implement component so that this can be included in the main loop
 public class Wrist implements Component {
@@ -45,6 +47,25 @@ public class Wrist implements Component {
         // Code ran every loop
         motor.set(mSpeed);
 
+    }
+
+    public void initDebug() {
+        ShuffleboardTab tab = Debug.wrist;
+
+        motor.setName("Motors", "Wrist");
+
+        upperLimitSwitch.setName("Limit Switches", "Upper Limit");
+        lowerLimitSwitch.setName("Limit Switches", "Lower Limit");
+
+        tab.add(motor);
+
+        tab.add(upperLimitSwitch);
+        tab.add(lowerLimitSwitch);
+
+        Debug.limitSwitches.add(upperLimitSwitch);
+        Debug.limitSwitches.add(lowerLimitSwitch);
+
+        Debug.motors.add(motor);
     }
 
     public static Wrist getInstance() {

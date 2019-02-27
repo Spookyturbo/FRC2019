@@ -14,6 +14,7 @@ import frc.component.Wrist;
 import frc.procedure.CameraAlign;
 import frc.sensor.Limelight;
 import frc.util.Component;
+import frc.util.Debug;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
@@ -71,10 +72,9 @@ public class Robot extends TimedRobot {
         components.add(wrist);
         components.add(arm);
 
-        drive.invertX(true);
+        Debug.init();
 
-        drive.initDebug();
-        arm.initDebug();
+        drive.invertX(true);
 
         // Put drive profiles on smartDashboard
         m_chooser.setDefaultOption("Logitech", OI.LOGITECH_CONTROLLER);
