@@ -20,10 +20,10 @@ public class OI {
     public static DriverProfile getProfile(String profile) {
         switch (profile) {
         default:
-        case LOGITECH_CONTROLLER:
-            return new LogitechProfile();
         case MAIN_DRIVER_PROFILE:
             return new DriverProfile();
+        case LOGITECH_CONTROLLER:
+            return new LogitechProfile();
         case ADMIN_PROFILE:
             return new AdminProfile();
         }
@@ -78,7 +78,9 @@ public class OI {
 
         public void controlArm() {
             arm.setSpeed(-assistant.getY(Hand.kLeft) * 0.65f);
+        }
 
+        public void controlArmPID() {
             // Toggle the PIDControl on the arm
             if (assistant.getRawButtonPressed(8)) {
                 // Prevent arm from drastically moving when first pressed
@@ -89,10 +91,17 @@ public class OI {
                     arm.enablePID();
                 }
             }
-        }
 
-        public void controlArmPID() {
             if (arm.isPIDEnabled()) {
+                double armAxis = -assistant.getY(Hand.kLeft) * 0.65f;
+
+                //Deadzone of 0.2
+                if(Math.abs(armAxis) > 0.2) {
+                    //Axis * maxEncoderChangePerSec * deltaTime;
+                    double deltaSetpoint = armAxis * 35 * 0.02f;
+                    arm.setSetpoint(arm.getSetpoint() + deltaSetpoint);
+                }
+
                 if (assistant.getAButton()) {
                     arm.setLow();
                 } else if (assistant.getXButton()) {
@@ -146,7 +155,7 @@ public class OI {
         }
     }
 
-    //---------------------------------------Logitech----------------------------------
+    // ---------------------------------------Logitech----------------------------------
     static class LogitechProfile extends DriverProfile {
         @Override
         public void controlWrist() {
@@ -156,10 +165,9 @@ public class OI {
         @Override
         public void controlRearJacks() {
             double jacksSpeed = 0;
-            if(assistant.getRawButton(8)) {
+            if (assistant.getRawButton(8)) {
                 jacksSpeed = -1;
-            }
-            else if(assistant.getRawButton(7)) {
+            } else if (assistant.getRawButton(7)) {
                 jacksSpeed = 1;
             }
 
@@ -175,6 +183,9 @@ public class OI {
 
         JoystickButton frontJackRetractButton = new JoystickButton(driver, 4); // xbox Y
         JoystickButton frontJackExtendButton = new JoystickButton(driver, 3); // xbox X
+
+        JoystickButton intakeOutButton = new JoystickButton(driver, 6); // right bumper
+        JoystickButton intakeInButton = new JoystickButton(driver, 5); // left bumper
 
         @Override
         public double getHorizontalDriveSpeed() {
@@ -195,11 +206,24 @@ public class OI {
                 arm.setSpeed(0.4f);
             } else if (armDownButton.get()) {
                 arm.setSpeed(-0.4f);
+            } else {
+                arm.setSpeed(0);
             }
         }
 
         @Override
         public void controlArmPID() {
+            // Toggle the PIDControl on the arm
+            if (driver.getRawButtonPressed(8)) {
+                // Prevent arm from drastically moving when first pressed
+                arm.setSetpoint(arm.getEncoder());
+                if (arm.isPIDEnabled()) {
+                    arm.disablePID();
+                } else {
+                    arm.enablePID();
+                }
+            }
+
             // PIDControl
             if (arm.isPIDEnabled()) {
                 double setPoint = Arm.getInstance().getSetpoint();
@@ -231,13 +255,11 @@ public class OI {
 
         @Override
         public void controlFrontJacks() {
-            if(frontJackExtendButton.get()) {
+            if (frontJackExtendButton.get()) {
                 jacks.setFrontSpeed(1);
-            }
-            else if(frontJackRetractButton.get()) {
+            } else if (frontJackRetractButton.get()) {
                 jacks.setFrontSpeed(-1);
-            }
-            else {
+            } else {
                 jacks.setFrontSpeed(0);
             }
         }
@@ -251,6 +273,17 @@ public class OI {
                 jacks.setRearSpeed(-1);
             } else {
                 jacks.setRearSpeed(0);
+            }
+        }
+
+        @Override
+        public void controlIntake() {
+            if (intakeOutButton.get()) { // out
+                intake.setSpeed(0.5f);
+            } else if (intakeInButton.get()) { // in
+                intake.setSpeed(-0.5f);
+            } else {
+                intake.setSpeed(0);
             }
         }
     }

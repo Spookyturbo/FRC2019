@@ -37,7 +37,7 @@ public class Debug {
         .withPosition(3, 0);
 
     public static final ShuffleboardLayout motors = sensors.getLayout("Motors", BuiltInLayouts.kList)
-        .withSize(2, 10)
+        .withSize(3, 10)
         .withPosition(6, 0);
 
     //Initialize the shuffleboard

@@ -134,9 +134,9 @@ public class PIDControl extends SendableBase {
     public void setSetpoint(double setpoint) {
         if (maxInput > minInput) {
             if (setpoint > maxInput) {
-                this.setpoint = setpoint;
+                this.setpoint = maxInput;
             } else if (setpoint < minInput) {
-                this.setpoint = setpoint;
+                this.setpoint = minInput;
             } else {
                 this.setpoint = setpoint;
             }

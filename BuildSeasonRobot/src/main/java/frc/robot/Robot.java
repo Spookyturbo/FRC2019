@@ -57,7 +57,7 @@ public class Robot extends TimedRobot {
         CameraServer.getInstance().startAutomaticCapture();
 
         // Init here, should be overwritten in telopinit
-        controlProfile = OI.getProfile(OI.ADMIN_PROFILE);
+        controlProfile = OI.getProfile(OI.MAIN_DRIVER_PROFILE);
         
         // Store in cleaner variables
         drive = Drive.getInstance();
@@ -77,8 +77,8 @@ public class Robot extends TimedRobot {
         drive.invertX(true);
 
         // Put drive profiles on smartDashboard
-        m_chooser.setDefaultOption("Logitech", OI.LOGITECH_CONTROLLER);
-        m_chooser.addOption("Feaven", OI.MAIN_DRIVER_PROFILE);
+        m_chooser.setDefaultOption("Feaven", OI.MAIN_DRIVER_PROFILE);
+        m_chooser.addOption("Logitech", OI.LOGITECH_CONTROLLER);
         m_chooser.addOption("Admin", OI.ADMIN_PROFILE);
 
         SmartDashboard.putData("Driver Mode", m_chooser);
@@ -120,6 +120,20 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void autonomousPeriodic() {
+
+        controlProfile.drive();
+        controlProfile.cameraDrive();
+
+        controlProfile.controlArm();
+        controlProfile.controlArmPID();
+
+        controlProfile.controlFrontJacks();
+        controlProfile.controlRearJackWheel();
+        controlProfile.controlRearJacks();
+
+        controlProfile.controlWrist();
+        controlProfile.controlIntake();
+
         updateAllComponents();
     }
 
@@ -129,6 +143,7 @@ public class Robot extends TimedRobot {
         if (m_driverSelected != m_chooser.getSelected()) {
             m_driverSelected = m_chooser.getSelected();
             controlProfile = OI.getProfile(m_driverSelected);
+            System.out.println("Selecting control profile: " + m_driverSelected);
         }
 
         //Set the camera values

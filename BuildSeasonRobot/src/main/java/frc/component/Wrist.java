@@ -10,6 +10,7 @@ package frc.component;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.robot.RobotMap;
 import frc.util.Component;
@@ -38,7 +39,7 @@ public class Wrist implements Component {
         if (upperLimitSwitch.get()) {
             mSpeed = Math.min(mSpeed, 0);
         } else if (lowerLimitSwitch.get()) {
-            //mSpeed = Math.max(mSpeed, 0);
+            mSpeed = Math.max(mSpeed, 0);
         }
     }
 
@@ -54,12 +55,13 @@ public class Wrist implements Component {
 
         motor.setName("Motors", "Wrist");
 
-        upperLimitSwitch.setName("Limit Switches", "Upper Limit");
-        lowerLimitSwitch.setName("Limit Switches", "Lower Limit");
+        upperLimitSwitch.setName("Limit Switches", "Upper Limit Wrist");
+        lowerLimitSwitch.setName("Limit Switches", "Lower Limit Wrist");
 
         tab.add(motor);
 
         tab.add(upperLimitSwitch);
+            //.withWidget(BuiltInWidgets.kBooleanBox);
         tab.add(lowerLimitSwitch);
 
         Debug.limitSwitches.add(upperLimitSwitch);
