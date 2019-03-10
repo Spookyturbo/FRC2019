@@ -104,56 +104,30 @@ public class Drive implements Component {
         leftEncoder.setName("Encoder", "Left");
         rightEncoder.setName("Encoder", "Right");
 
-        tab.add(FL);
-        tab.add(FR);
-        tab.add(BL);
-        tab.add(BR);
+        tab.add(FL)
+            .withPosition(0, 0);
+        tab.add(FR)
+            .withPosition(2, 0);
+        tab.add(BL)
+            .withPosition(0, 1);
+        tab.add(BR)
+            .withPosition(2, 1);
 
-        tab.add(mecanumDrive);
+        tab.add(mecanumDrive)
+            .withPosition(0, 2);
 
-        tab.add(leftEncoder);
-        tab.add(rightEncoder);
-    }
+        tab.add(leftEncoder)
+            .withPosition(5, 0);
+        tab.add(rightEncoder)
+            .withPosition(5, 1);
 
-    public void updateDebug() {
-        
-    }
+        Debug.encoders.add(leftEncoder);
+        Debug.encoders.add(rightEncoder);
 
-    // Debug the groups and individual motors
-    public void debugMotors() {
-        leftMotors.setName("DriveMotor", "Left Motors");
-        rightMotors.setName("DriveMotor", "Right Motors");
-        FL.setName("DriveMotor", "Front Left");
-        BL.setName("DriveMotor", "Back Left");
-        FR.setName("DriveMotor", "Front Right");
-        BR.setName("DriveMotor", "Back Right");
-
-        LiveWindow.add(leftMotors);
-        LiveWindow.add(rightMotors);
-
-        LiveWindow.add(FL);
-        LiveWindow.add(BL);
-        LiveWindow.add(FR);
-        LiveWindow.add(BR);
-    }
-
-    // Debug the mecanum drive
-    public void debugMecanum() {
-        Debug.drive.add(mecanumDrive);
-        LiveWindow.add(mecanumDrive);
-    }
-
-    // Debug the tank drive
-    // public void debugTank() {
-    // tankDrive.setName("Drive System", "Tank");
-    // LiveWindow.add(tankDrive);
-    // }
-
-    // Runs all of the debug software
-    public void debugAll() {
-        debugMotors();
-        debugMecanum();
-        // debugTank();
+        Debug.motors.add(FL);
+        Debug.motors.add(FR);
+        Debug.motors.add(BL);
+        Debug.motors.add(BR);
     }
 
     public static Drive getInstance() {

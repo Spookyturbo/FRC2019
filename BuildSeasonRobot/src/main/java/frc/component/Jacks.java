@@ -8,8 +8,13 @@
 package frc.component;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.robot.RobotMap;
 import frc.util.Component;
+import frc.util.Debug;
+
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
 /**
@@ -73,6 +78,46 @@ public class Jacks implements Component {
     frontJack.set(frontSpeed);
     rearJack.set(rearSpeed);
     jackWheel.set(wheelSpeed);
+  }
+
+  public void initDebug() {
+    ShuffleboardTab tab = Debug.jacks;
+
+    ShuffleboardLayout motorLayout = tab.getLayout("Motors", BuiltInLayouts.kList)
+      .withSize(2, 3)
+      .withPosition(0, 0);
+    ShuffleboardLayout limitLayout = tab.getLayout("Limit Switches", BuiltInLayouts.kList)
+      .withSize(2, 4)
+      .withPosition(3, 0);
+
+    frontJack.setName("Motors", "Front");
+    rearJack.setName("Motors", "Rear");
+    jackWheel.setName("Motors", "Wheel");
+
+    frontUpperLimit.setName("Limit Switches", "Front Extended");
+    frontLowerLimit.setName("Limit Switches", "Front Retracted");
+
+    rearUpperLimit.setName("Limit Switches", "Rear Up");
+    rearLowerLimit.setName("Limit Switches", "Rear Down");
+
+    motorLayout.add(frontJack);
+    motorLayout.add(rearJack);
+    motorLayout.add(jackWheel);
+
+    limitLayout.add(frontUpperLimit);
+    limitLayout.add(frontLowerLimit);
+
+    limitLayout.add(rearUpperLimit);
+    limitLayout.add(rearLowerLimit);
+
+    Debug.limitSwitches.add(frontUpperLimit);
+    Debug.limitSwitches.add(frontLowerLimit);
+    Debug.limitSwitches.add(rearUpperLimit);
+    Debug.limitSwitches.add(rearLowerLimit);
+
+    Debug.motors.add(frontJack);
+    Debug.motors.add(rearJack);
+    Debug.motors.add(jackWheel);
   }
 
   public static Jacks getInstance() {

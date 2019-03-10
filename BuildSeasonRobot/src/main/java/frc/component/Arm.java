@@ -7,8 +7,10 @@
 package frc.component;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
+
 import frc.robot.RobotMap;
 import frc.sensor.PIDControl;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
@@ -37,32 +39,40 @@ public class Arm implements Component {
     Encoder armEncoder = new Encoder(RobotMap.Encoders.armA, RobotMap.Encoders.armB, false, EncodingType.k4X);
 
     // Control Profiling
-    PIDControl armPID = new PIDControl(0.06, 0.001, 0.03, 0);
+    //0.03, 0.001, 0.01, 0.09
+    PIDControl armPID = new PIDControl(0.03, 0.001, 0.01, 0.09);
     boolean closedLoop = false;
     double feedForward = 0.12f;
 
     // Encoder constants
     public static final double ARM_HIGH = 63.75f;
-    public static final double ARM_MIDDLE = 35.75f;
+    public static final double ARM_MIDDLE = 37.5f;
     public static final double ARM_LOW = 9.75f;
     public static final double ARM_MIN = 0f;
     public static final double ARM_MAX = 70f;
 
     // Angle of arm at corresponding limit switches (Typical UNIT circle)
-    public static final double ANGLE_MAX = 70f;
-    public static final double ANGLE_MIN = -70f;
+    public static final double ANGLE_MAX = 50f;
+    public static final double ANGLE_MIN = -50f;
 
     //Motor speed
     double mSpeed;
+
+    //For tuning through the smartdashboard
+    NetworkTableEntry downP = Debug.arm.add("DownP", 0.03).getEntry();
+    NetworkTableEntry downI = Debug.arm.add("DownI", 0.001).getEntry();
+    NetworkTableEntry downD = Debug.arm.add("DownD", 0.01).getEntry();
+    NetworkTableEntry downF = Debug.arm.add("DownF", 0.09).getEntry();
+
+    NetworkTableEntry p = Debug.arm.add("P", 0.03).getEntry();
+    NetworkTableEntry i = Debug.arm.add("I", 0.001).getEntry();
+    NetworkTableEntry d = Debug.arm.add("D", 0.01).getEntry();
+    NetworkTableEntry f = Debug.arm.add("F", 0.09).getEntry();
 
     private Arm() {
 
         armEncoder.reset();
         armPID.initSmartDashboard("Arm");
-
-        SmartDashboard.putNumber("DownP", 0.06);
-        SmartDashboard.putNumber("DownI", 0);
-        SmartDashboard.putNumber("DownD", 0.03);
 
         LiveWindow.add(armPID);
         armMotor.setInverted(true);
@@ -77,6 +87,8 @@ public class Arm implements Component {
         // between run loops
         armPID.setIKickInRate(5);
         // Just here to remove the public constructor
+
+        enablePID();
     }
 
     //Set the power of the motor. Scaled from -1 to 1 for -100% to 100% power
@@ -109,21 +121,17 @@ public class Arm implements Component {
             armEncoder.reset();
         }
 
+        double armAngle = getNormalizedEncoder() * (ANGLE_MAX - ANGLE_MIN) + ANGLE_MIN;
+        //Closed Loop PIDControl
         if(closedLoop) {
             //Get the degrees from the min that the arm is currently at and the adds the MIN
-            double armAngle = getNormalizedEncoder() * (ANGLE_MAX - ANGLE_MIN) + ANGLE_MIN;
-            //double currentFeedforward =  Math.copySign(feedForward, armPID.getError());
-            //Use the PID loop using the current feedback device, as well as the feedforward term A*cos(theta)
-            // if(Math.abs(mSpeed) > 0.2f) {
-            //     armPID.acumulateError = false;
-            // }
-            // else {
-            //     armPID.acumulateError = true;
-            // }
-            mSpeed = armPID.calculate(armEncoder.get(), feedForward);
-        }
+            //Possibly work this in as feed forward, does nothing for now
 
-        armMotor.set(mSpeed);
+            mSpeed = armPID.calculate(armEncoder.get(), Math.cos(Math.toRadians(armAngle)));
+        }
+        double feedForward = Math.cos(Math.toRadians(armAngle));
+        
+        armMotor.set(mSpeed + feedForward * f.getDouble(0));
     }
 
     //Set the arm to the high position for placing hatches on the rocket
@@ -200,13 +208,14 @@ public class Arm implements Component {
 
     //Set to these constants when the arm is going down
     private void decreasingPID() {
-        //0.01, 0.0001, 0.01
-        armPID.setPID(0.01, 0.0001, 0.01);
+        //0.01, 0.0001, 0.01, 0.1
+        armPID.setPIDF(downP.getDouble(0.01), downI.getDouble(0.0001), downD.getDouble(0.01), downF.getDouble(0));
     }
 
     //Set to these constants when the arm is going up
     private void increasingPID() {
-        armPID.setPID(0.06, 0, 0.03);
+        //0.06, 0.001, 0.03, 0.1
+        armPID.setPIDF(p.getDouble(0.06), i.getDouble(0.001), d.getDouble(0.03), f.getDouble(0));
     }
 
     //Returns the encoder scaled from 0-1 using the min and max height for it
@@ -231,19 +240,26 @@ public class Arm implements Component {
 
         armEncoder.setName("Encoders", "Arm Height");
 
-        limitLower.setName("Limit Switches", "Lower Limit");
-        limitUpper.setName("Limit Switches", "Upper Limit");
+        limitLower.setName("Limit Switches", "Lower Limit Arm");
+        limitUpper.setName("Limit Switches", "Upper Limit Arm");
 
         armPID.setName("PID", "ArmPID");
 
         tab.add(armMotor);
         tab.add(armEncoder);
-        tab.add(limitLower)
-            .withWidget(BuiltInWidgets.kBooleanBox);
-        tab.add(limitUpper)
-            .withWidget(BuiltInWidgets.kBooleanBox);
-        tab.add(armPID)
-            .withWidget(BuiltInWidgets.kPIDController);
+        tab.add(limitLower);
+            //.withWidget(BuiltInWidgets.kBooleanBox);
+        tab.add(limitUpper);
+            //.withWidget(BuiltInWidgets.kBooleanBox);
+        tab.add(armPID);
+            //.withWidget(BuiltInWidgets.kPIDController);
+
+        Debug.encoders.add(armEncoder);
+        
+        Debug.limitSwitches.add(limitUpper);
+        Debug.limitSwitches.add(limitLower);
+
+        Debug.motors.add(armMotor);
     }
 
     // Handle the singleton instance

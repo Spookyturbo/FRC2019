@@ -4,49 +4,34 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
 import frc.component.Arm;
+import frc.component.Drive;
+import frc.component.Intake;
+import frc.component.Jacks;
+import frc.component.Wrist;
+import frc.procedure.CameraAlign;
 
 public class OI {
     // Administrator, DriveTrials, Competition
     public static final String ADMIN_PROFILE = "Administrator";
-    public static final String DRIVER_TRIALS_PROFILE = "DriveTrials";
+    public static final String MAIN_DRIVER_PROFILE = "Feaven";
+    public static final String LOGITECH_CONTROLLER = "Logitech";
 
     // Create and return the profile
-    public static ControlProfile getProfile(String profile) {
+    public static DriverProfile getProfile(String profile) {
         switch (profile) {
         default:
-            return new DriverTrialsProfile();
+        case MAIN_DRIVER_PROFILE:
+            return new DriverProfile();
+        case LOGITECH_CONTROLLER:
+            return new LogitechProfile();
         case ADMIN_PROFILE:
             return new AdminProfile();
-        case DRIVER_TRIALS_PROFILE:
-            return new DriverTrialsProfile();
         }
     }
 
-    interface ControlProfile {
+    static class DriverProfile {
         XboxController driver = new XboxController(0);
         XboxController assistant = new XboxController(1);
-
-        double getHorizontalDriveSpeed();
-
-        double getVerticalDriveSpeed();
-
-        double getRotationalDriveSpeed();
-
-        double getWristSpeed();
-
-        double getArmSpeed();
-
-        double getFrontJackSpeed();
-
-        double getRearJackSpeed();
-
-        double getJackWheelSpeed();
-
-        double getIntakeSpeed();
-    }
-
-    // --------------------------------------DRIVERTRIALS--------------------------------------
-    static class DriverTrialsProfile implements ControlProfile {
 
         JoystickButton intakeOutButton = new JoystickButton(assistant, 6); // right bumper
         JoystickButton intakeInButton = new JoystickButton(assistant, 5); // left bumper
@@ -54,125 +39,153 @@ public class OI {
         JoystickButton frontJackExtendButton = new JoystickButton(driver, 6); // Right bumper
         JoystickButton frontJackRetractButton = new JoystickButton(driver, 5); // Left bumper
 
-        @Override
+        Drive drive = Drive.getInstance();
+        Arm arm = Arm.getInstance();
+        Jacks jacks = Jacks.getInstance();
+        Wrist wrist = Wrist.getInstance();
+        Intake intake = Intake.getInstance();
+
+        CameraAlign cameraAlign = CameraAlign.getInstance();
+
         public double getHorizontalDriveSpeed() {
-            // Deadzone (Controller has a bit of issues centering from the right)
+            // Deadzone (Controller has a bit of issues centering from the right) (Think
+            // this is only the Bluetooth one)
             double controllerValue = driver.getX(Hand.kLeft);
             return (Math.abs(controllerValue) < 0.13f) ? 0 : controllerValue;
         }
 
-        @Override
         public double getVerticalDriveSpeed() {
             return driver.getY(Hand.kLeft);
         }
 
-        @Override
         public double getRotationalDriveSpeed() {
             return driver.getX(Hand.kRight);
         }
 
-        @Override
-        public double getWristSpeed() {
-            //return -assistant.getRawAxis(3) / 0.6f;
-            return -assistant.getY(Hand.kRight) / 0.6;
+        public void drive() {
+            // Drive based off controls
+            drive.driveCartesian(getHorizontalDriveSpeed(), getVerticalDriveSpeed(), getRotationalDriveSpeed());
         }
 
-        @Override
-        public double getArmSpeed() {
-            Arm arm = Arm.getInstance();
-            double armSpeed = 0;
+        public void cameraDrive() {
+            // Drive based off camera
+            if (driver.getRawButtonPressed(7)) {
+                cameraAlign.resetPID();
+            } else if (driver.getRawButton(7)) {
+                cameraAlign.run();
+            }
+        }
+
+        public void controlArm() {
+            arm.setSpeed(-assistant.getY(Hand.kLeft) * 0.65f);
+        }
+
+        public void controlArmPID() {
+            // Toggle the PIDControl on the arm
+            if (assistant.getRawButtonPressed(8)) {
+                // Prevent arm from drastically moving when first pressed
+                arm.setSetpoint(arm.getEncoder());
+                if (arm.isPIDEnabled()) {
+                    arm.disablePID();
+                } else {
+                    arm.enablePID();
+                }
+            }
 
             if (arm.isPIDEnabled()) {
-                if(assistant.getAButton()) {
-                    arm.setSetpoint(Arm.ARM_LOW);
-                }
-                else if(assistant.getXButton()) {
-                    arm.setSetpoint(Arm.ARM_MIDDLE);
-                }
-                else if(assistant.getYButton()) {
-                    arm.setSetpoint(Arm.ARM_HIGH);
-                }
-                else if(assistant.getBButton()) {
-                    arm.setSetpoint(Arm.ARM_MIN);
+                double armAxis = -assistant.getY(Hand.kLeft) * 0.65f;
+
+                //Deadzone of 0.2
+                if(Math.abs(armAxis) > 0.2) {
+                    //Axis * maxEncoderChangePerSec * deltaTime;
+                    double deltaSetpoint = armAxis * 35 * 0.02f;
+                    arm.setSetpoint(arm.getSetpoint() + deltaSetpoint);
                 }
 
-                // Speed is set in arm via PID
-                armSpeed = arm.getSpeed();
-                return armSpeed;
+                if (assistant.getAButton()) {
+                    arm.setLow();
+                } else if (assistant.getXButton()) {
+                    arm.setMiddle();
+                } else if (assistant.getYButton()) {
+                    arm.setHigh();
+                } else if (assistant.getBButton()) {
+                    arm.setDown();
+                }
             }
-
-            return -assistant.getY(Hand.kLeft) * 0.65f;
         }
 
-        @Override
-        public double getFrontJackSpeed() {
+        public void controlWrist() {
+            wrist.setSpeed(-assistant.getY(Hand.kRight) * 0.6f);
+        }
+
+        public void controlFrontJacks() {
             if (frontJackExtendButton.get()) {
-                return 1;
+                jacks.setFrontSpeed(1f);
             } else if (frontJackRetractButton.get()) {
-                return -1f;
+                jacks.setFrontSpeed(-1f);
+            } else {
+                jacks.setFrontSpeed(0);
             }
-
-            return 0;
         }
 
-        @Override
-        public double getRearJackSpeed() {
-            //int pov = assistant.getPOV();
-            // if (pov == 0 || pov == 45 || pov == 315) {
-            //     return 1;
-            // } else if (pov == 180 || pov == 225 || pov == 135) {
-            //     return -1;
-            // }
-
+        public void controlRearJacks() {
             double speed = assistant.getRawAxis(2) - assistant.getRawAxis(3);
-
-            return speed;
+            jacks.setRearSpeed(speed);
         }
 
-        @Override
-        public double getJackWheelSpeed() {
+        public void controlRearJackWheel() {
             int pov = assistant.getPOV();
             if (pov == 90 || pov == 45 || pov == 135) {
-                return -1;
+                jacks.setWheelSpeed(-1);
             } else if (pov == 270 || pov == 225 || pov == 315) {
-                return 1;
+                jacks.setWheelSpeed(1);
+            } else {
+                jacks.setWheelSpeed(0);
             }
+        }
 
-            return 0;
+        public void controlIntake() {
+            if (intakeOutButton.get()) { // out
+                intake.setSpeed(0.5f);
+            } else if (intakeInButton.get()) { // in
+                intake.setSpeed(-0.5f);
+            } else {
+                intake.setSpeed(0);
+            }
+        }
+    }
+
+    // ---------------------------------------Logitech----------------------------------
+    static class LogitechProfile extends DriverProfile {
+        @Override
+        public void controlWrist() {
+            wrist.setSpeed(-assistant.getRawAxis(3));
         }
 
         @Override
-        public double getIntakeSpeed() {
-            if (intakeOutButton.get()) {
-                return 0.5;
-            } else if (intakeInButton.get()) {
-                return -0.5;
+        public void controlRearJacks() {
+            double jacksSpeed = 0;
+            if (assistant.getRawButton(8)) {
+                jacksSpeed = -1;
+            } else if (assistant.getRawButton(7)) {
+                jacksSpeed = 1;
             }
 
-            return 0;
+            jacks.setRearSpeed(jacksSpeed);
         }
-
     }
 
     // --------------------------------------ADMIN--------------------------------------
-    static class AdminProfile implements ControlProfile {
+    static class AdminProfile extends DriverProfile {
 
-        public JoystickButton cameraTarget = new JoystickButton(driver, 7);
-
-        JoystickButton armUpButton = new JoystickButton(driver, 2);
+        JoystickButton armUpButton = new JoystickButton(driver, 2); // Xbox B
         JoystickButton armDownButton = new JoystickButton(driver, 1); // xbox A
-
-        JoystickButton intakeOutButton = new JoystickButton(driver, 5); // xbox left bumber
-        JoystickButton intakeInButton = new JoystickButton(driver, 6); // xbox right bumper
 
         JoystickButton frontJackRetractButton = new JoystickButton(driver, 4); // xbox Y
         JoystickButton frontJackExtendButton = new JoystickButton(driver, 3); // xbox X
 
-        JoystickButton rearJackUpButton = new JoystickButton(driver, 3);
-        JoystickButton rearJackDownButton = new JoystickButton(driver, 5);
-
-        JoystickButton wheelJackOutButton = new JoystickButton(driver, 4);
-        JoystickButton wheelJackInButton = new JoystickButton(driver, 6);
+        JoystickButton intakeOutButton = new JoystickButton(driver, 6); // right bumper
+        JoystickButton intakeInButton = new JoystickButton(driver, 5); // left bumper
 
         @Override
         public double getHorizontalDriveSpeed() {
@@ -182,46 +195,47 @@ public class OI {
         }
 
         @Override
-        public double getVerticalDriveSpeed() {
-            return driver.getY(Hand.kLeft);
+        public void controlWrist() {
+            double wristSpeed = driver.getTriggerAxis(Hand.kLeft) - driver.getTriggerAxis(Hand.kRight); // Add the
+            wrist.setSpeed(wristSpeed);
         }
 
         @Override
-        public double getRotationalDriveSpeed() {
-            return driver.getX(Hand.kRight);
-        }
-
-        @Override
-        public double getWristSpeed() {
-            double wristSpeed = driver.getTriggerAxis(Hand.kLeft) * 1f; // Add the up speed
-            wristSpeed += driver.getTriggerAxis(Hand.kRight) * -1f; // Add the down speed
-            return wristSpeed;
-        }
-
-        @Override
-        public double getArmSpeed() {
-            Arm arm = Arm.getInstance();
-            double armSpeed = 0;
-
+        public void controlArm() {
             if (armUpButton.get()) {
-                armSpeed = 0.4f;
+                arm.setSpeed(0.4f);
             } else if (armDownButton.get()) {
-                armSpeed = -0.4f;
+                arm.setSpeed(-0.4f);
+            } else {
+                arm.setSpeed(0);
+            }
+        }
+
+        @Override
+        public void controlArmPID() {
+            // Toggle the PIDControl on the arm
+            if (driver.getRawButtonPressed(8)) {
+                // Prevent arm from drastically moving when first pressed
+                arm.setSetpoint(arm.getEncoder());
+                if (arm.isPIDEnabled()) {
+                    arm.disablePID();
+                } else {
+                    arm.enablePID();
+                }
             }
 
+            // PIDControl
             if (arm.isPIDEnabled()) {
                 double setPoint = Arm.getInstance().getSetpoint();
                 if (driver.getBButtonPressed()) { // Up
                     if (setPoint < 0) {
-                        arm.setSetpoint(0);
-                        ;
+                        arm.setDown();
                     } else if (setPoint < Arm.ARM_LOW) {
                         arm.setLow();
                     } else if (setPoint < Arm.ARM_MIDDLE) {
                         arm.setMiddle();
                     } else if (setPoint < Arm.ARM_HIGH) {
                         arm.setHigh();
-                        ;
                     }
                 } else if (driver.getAButtonPressed()) { // Down
                     if (setPoint > Arm.ARM_HIGH) {
@@ -231,64 +245,46 @@ public class OI {
                     } else if (setPoint > Arm.ARM_LOW) {
                         arm.setLow();
                     } else if (setPoint > 0) {
-                        arm.setSetpoint(0);
+                        arm.setDown();
                     }
                 } else if (driver.getStickButtonPressed(Hand.kRight)) {
                     arm.setSetpoint(arm.getSetpoint() - 6);
                 }
-
-                // Speed is set in arm via PID
-                armSpeed = arm.getSpeed();
             }
-
-            return armSpeed;
         }
 
         @Override
-        public double getFrontJackSpeed() {
+        public void controlFrontJacks() {
             if (frontJackExtendButton.get()) {
-                return 1;
+                jacks.setFrontSpeed(1);
             } else if (frontJackRetractButton.get()) {
-                return -1f;
+                jacks.setFrontSpeed(-1);
+            } else {
+                jacks.setFrontSpeed(0);
             }
-
-            return 0;
         }
 
         @Override
-        public double getRearJackSpeed() {
+        public void controlRearJacks() {
             int pov = driver.getPOV();
             if (pov == 0 || pov == 45 || pov == 315) {
-                return 1;
+                jacks.setRearSpeed(1);
             } else if (pov == 180 || pov == 225 || pov == 135) {
-                return -1;
+                jacks.setRearSpeed(-1);
+            } else {
+                jacks.setRearSpeed(0);
             }
-
-            return 0;
         }
 
         @Override
-        public double getJackWheelSpeed() {
-            int pov = driver.getPOV();
-            if (pov == 90 || pov == 45 || pov == 135) {
-                return -1;
-            } else if (pov == 270 || pov == 225 || pov == 315) {
-                return 1;
+        public void controlIntake() {
+            if (intakeOutButton.get()) { // out
+                intake.setSpeed(0.5f);
+            } else if (intakeInButton.get()) { // in
+                intake.setSpeed(-0.5f);
+            } else {
+                intake.setSpeed(0);
             }
-
-            return 0;
         }
-
-        @Override
-        public double getIntakeSpeed() {
-            if (intakeOutButton.get()) {
-                return 1;
-            } else if (intakeInButton.get()) {
-                return -1;
-            }
-
-            return 0;
-        }
-
     }
 }
