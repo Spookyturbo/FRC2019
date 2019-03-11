@@ -74,43 +74,34 @@ public class OI {
             } else if (driver.getRawButton(7)) {
                 cameraAlign.run();
             }
-        }
+        } 
 
         public void controlArm() {
-            arm.setSpeed(-assistant.getY(Hand.kLeft) * 0.65f);
+            double speed = -assistant.getY(Hand.kLeft) * 0.65f;
+
+            // Switch back to user control if using it
+            if (Math.abs(speed) > 0.2) {
+                arm.disablePID();
+            }
+
+            arm.setSpeed(speed);
         }
 
         public void controlArmPID() {
             // Toggle the PIDControl on the arm
-            if (assistant.getRawButtonPressed(8)) {
-                // Prevent arm from drastically moving when first pressed
-                arm.setSetpoint(arm.getEncoder());
-                if (arm.isPIDEnabled()) {
-                    arm.disablePID();
-                } else {
-                    arm.enablePID();
-                }
-            }
 
-            if (arm.isPIDEnabled()) {
-                double armAxis = -assistant.getY(Hand.kLeft) * 0.65f;
-
-                //Deadzone of 0.2
-                if(Math.abs(armAxis) > 0.2) {
-                    //Axis * maxEncoderChangePerSec * deltaTime;
-                    double deltaSetpoint = armAxis * 35 * 0.02f;
-                    arm.setSetpoint(arm.getSetpoint() + deltaSetpoint);
-                }
-
-                if (assistant.getAButton()) {
-                    arm.setLow();
-                } else if (assistant.getXButton()) {
-                    arm.setMiddle();
-                } else if (assistant.getYButton()) {
-                    arm.setHigh();
-                } else if (assistant.getBButton()) {
-                    arm.setDown();
-                }
+            if (assistant.getAButton()) {
+                arm.enablePID();
+                arm.setLow();
+            } else if (assistant.getXButton()) {
+                arm.enablePID();
+                arm.setMiddle();
+            } else if (assistant.getYButton()) {
+                arm.enablePID();
+                arm.setHigh();
+            } else if (assistant.getBButton()) {
+                arm.enablePID();
+                arm.setDown();
             }
         }
 
