@@ -9,6 +9,7 @@ package frc.component;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
+import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -26,6 +27,9 @@ public class Wrist implements Component {
 
     DigitalInput lowerLimitSwitch = new DigitalInput(RobotMap.limitSwitches.wristDown);
     DigitalInput upperLimitSwitch = new DigitalInput(RobotMap.limitSwitches.wristUp);
+
+    DigitalInput wristRotationCount = new DigitalInput(18);
+    Counter wristEncoder = new Counter(wristRotationCount);
 
     double mSpeed;
 
@@ -47,7 +51,7 @@ public class Wrist implements Component {
     public void execute() {
         // Code ran every loop
         motor.set(mSpeed);
-
+        System.out.println(wristEncoder.get());
     }
 
     public void initDebug() {
