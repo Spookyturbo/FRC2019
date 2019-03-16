@@ -58,7 +58,7 @@ public class Robot extends TimedRobot {
 
         // Init here, should be overwritten in telopinit
         controlProfile = OI.getProfile(OI.MAIN_DRIVER_PROFILE);
-        
+
         // Store in cleaner variables
         drive = Drive.getInstance();
         jacks = Jacks.getInstance();
@@ -111,8 +111,20 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
-        m_driverSelected = m_chooser.getSelected();
+        if (m_driverSelected != m_chooser.getSelected()) {
+            m_driverSelected = m_chooser.getSelected();
+            controlProfile = OI.getProfile(m_driverSelected);
+        }
         // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
+        // Set the camera values
+        Limelight.getInstance().setPipeline(1);
+        Limelight.getInstance().setLightState(Limelight.LightMode.ON);
+        CameraAlign camera = CameraAlign.getInstance();
+        camera.align(5);
+        while(!camera.isCompleted()) {
+            camera.run();
+        }
+
     }
 
     /**
@@ -143,10 +155,9 @@ public class Robot extends TimedRobot {
         if (m_driverSelected != m_chooser.getSelected()) {
             m_driverSelected = m_chooser.getSelected();
             controlProfile = OI.getProfile(m_driverSelected);
-            System.out.println("Selecting control profile: " + m_driverSelected);
         }
 
-        //Set the camera values
+        // Set the camera values
         Limelight.getInstance().setPipeline(1);
         Limelight.getInstance().setLightState(Limelight.LightMode.ON);
     }
@@ -157,7 +168,13 @@ public class Robot extends TimedRobot {
     // leftEncoder = 8,9
     @Override
     public void teleopPeriodic() {
-        
+        // double[] yCorners = Limelight.getInstance().getYCorners();
+
+        // double leftCorner = yCorners[1];
+        // double rightCorner = yCorners[0];
+
+        // System.out.println("LeftCorner: " + leftCorner + " RightCorner: " + rightCorner + " Bool: " + (leftCorner > rightCorner));
+
         controlProfile.drive();
         controlProfile.cameraDrive();
 

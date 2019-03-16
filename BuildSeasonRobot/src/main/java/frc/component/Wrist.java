@@ -51,7 +51,7 @@ public class Wrist implements Component {
     public void execute() {
         // Code ran every loop
         motor.set(mSpeed);
-        System.out.println(wristEncoder.get());
+        //System.out.println(wristEncoder.get());
     }
 
     public void initDebug() {

@@ -9,6 +9,7 @@ import frc.component.Intake;
 import frc.component.Jacks;
 import frc.component.Wrist;
 import frc.procedure.CameraAlign;
+import frc.sensor.Limelight;
 
 public class OI {
     // Administrator, DriveTrials, Competition
@@ -46,6 +47,7 @@ public class OI {
         Intake intake = Intake.getInstance();
 
         CameraAlign cameraAlign = CameraAlign.getInstance();
+        Limelight camera = Limelight.getInstance();
 
         public double getHorizontalDriveSpeed() {
             // Deadzone (Controller has a bit of issues centering from the right) (Think
@@ -69,9 +71,26 @@ public class OI {
 
         public void cameraDrive() {
             // Drive based off camera
-            if (driver.getRawButtonPressed(7)) {
+            if(driver.getAButtonPressed() || driver.getXButtonPressed() || driver.getYButtonPressed()) {
                 cameraAlign.resetPID();
-            } else if (driver.getRawButton(7)) {
+            }
+
+            if(driver.getAButton()) { //Hatch placement
+                if(driver.getAButtonPressed() && camera.getPipeIndex() != 1) {
+                    camera.setPipeline(1);
+                }
+                cameraAlign.run();
+            }
+            else if(driver.getXButton()) { //Hatch retrieval
+                if(driver.getXButtonPressed() && camera.getPipeIndex() != 2) {
+                    camera.setPipeline(2);
+                }
+                cameraAlign.run();
+            }
+            else if(driver.getYButton()) { //Cargo placement
+                if(driver.getYButtonPressed() && camera.getPipeIndex() != 3) {
+                    camera.setPipeline(3);
+                }
                 cameraAlign.run();
             }
         } 
@@ -189,6 +208,15 @@ public class OI {
         public void controlWrist() {
             double wristSpeed = driver.getTriggerAxis(Hand.kLeft) - driver.getTriggerAxis(Hand.kRight); // Add the
             wrist.setSpeed(wristSpeed);
+        }
+
+        @Override
+        public void cameraDrive() {
+            if (driver.getRawButtonPressed(7)) {
+                cameraAlign.resetPID();
+            } else if (driver.getRawButton(7)) {
+                cameraAlign.run();
+            }
         }
 
         @Override

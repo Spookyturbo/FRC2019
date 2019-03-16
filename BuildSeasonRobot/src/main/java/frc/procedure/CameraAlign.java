@@ -7,6 +7,8 @@
 
 package frc.procedure;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.component.Drive;
@@ -23,9 +25,12 @@ public class CameraAlign {
     private Limelight camera = Limelight.getInstance();
     private Drive drive = Drive.getInstance();
 
+    private int timeout;
+    Timer timer = new Timer();
+
     PIDControl distanceController = new PIDControl(0.1);
-    PIDControl strafingController = new PIDControl(0.1, 0.001);
-    PIDControl rotationController = new PIDControl(0.009);
+    PIDControl strafingController = new PIDControl(0.1, 0.01);
+    PIDControl rotationController = new PIDControl(0.05, 0.001);
 
     private CameraAlign() {
         distanceController.setOutputRange(-0.5, 0.5);
@@ -38,33 +43,72 @@ public class CameraAlign {
 
         distanceController.setTolerance(0.5);
         strafingController.setTolerance(0.5);
-        rotationController.setTolerance(2);
+        rotationController.setTolerance(1);
 
         distanceController.setSetpoint(0);
         strafingController.setSetpoint(0);
-        rotationController.setSetpoint(0);
+        rotationController.setSetpoint(-1.6);
 
-        strafingController.initSmartDashboard("CameraDistance");
-        LiveWindow.add(strafingController);
+        rotationController.setContinuous();
+
+        strafingController.setMaxIContribution(0.3f);
+        strafingController.setIKickInRate(2);
+
+        rotationController.setIKickInRate(2);
+
+        // strafingController.initSmartDashboard("CameraStrafe");
+        // distanceController.initSmartDashboard("CameraDistance");
+        // rotationController.initSmartDashboard("CameraRotation");
+        // LiveWindow.add(strafingController);
     }
 
     public void run() {
-        strafingController.updateFromSmartDashboard("CameraDistance");
-        double[] yCorners = camera.getYCorners();
+        // strafingController.updateFromSmartDashboard("CameraStrafe");
+        // distanceController.updateFromSmartDashboard("CameraDistance");
+        // rotationController.updateFromSmartDashboard("CameraRotation");
+        // double[] yCorners = camera.getYCorners();
 
-        double leftCorner = yCorners[1];
-        double rightCorner = yCorners[0];
+        // double leftCorner = yCorners[1];
+        // double rightCorner = yCorners[0];
 
         double strafingSpeed = -strafingController.calculate(camera.getXAngle());
         double distanceSpeed = -distanceController.calculate(camera.getYAngle());
         double rotationSpeed = rotationController.calculate(camera.getSkew());
 
-        if(leftCorner < rightCorner) {
-            rotationSpeed *= -1;   
-        }
+        // if(leftCorner < rightCorner) {
+        //     rotationSpeed *= -1;   
+        // }
         
+        //cant strafe and rotate at the same time unless less then this
+        // if(Math.abs(rotationSpeed) > 0.08) {
+        //     strafingSpeed = 0;
+        // }
+
         //Strafe to the indicated position
         drive.driveCartesian(strafingSpeed, distanceSpeed, rotationSpeed);
+    }
+
+    //Runs the alignment for a set period of time until the timeout happens or is alligned
+    public void align(int timeout) {
+        this.timeout = timeout;
+        timer.reset();
+        timer.start();
+
+        run();
+    }
+
+    //Returns if correctly aligned
+    public boolean isAlligned() {
+        return strafingController.onTarget() && distanceController.onTarget() && rotationController.onTarget();
+    }
+
+    public boolean isCompleted() {
+        if(timer.hasPeriodPassed(timeout) || isAlligned()) {
+            timer.stop();
+            return true;
+        }
+        
+        return false;
     }
 
     //Should be called at the start of a move using this
