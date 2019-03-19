@@ -40,16 +40,16 @@ public class Arm implements Component {
 
     // Control Profiling
     //0.03, 0.001, 0.01, 0.09
-    PIDControl armPID = new PIDControl(0.03, 0.001, 0.01, 0.09);
+    PIDControl armPID = new PIDControl(0.03, 0.001, 0.01);
     boolean closedLoop = false;
     double feedForward = 0.12f;
 
     // Encoder constants
-    public static final double ARM_HIGH = 63.75f;
-    public static final double ARM_MIDDLE = 37.5f;
-    public static final double ARM_LOW = 9.75f;
+    public static final double ARM_HIGH = 94f;
+    public static final double ARM_MIDDLE = 53.5f;
+    public static final double ARM_LOW = 19f;
     public static final double ARM_MIN = 0f;
-    public static final double ARM_MAX = 70f;
+    public static final double ARM_MAX = 107f;
 
     // Angle of arm at corresponding limit switches (Typical UNIT circle)
     public static final double ANGLE_MAX = 50f;
@@ -80,14 +80,13 @@ public class Arm implements Component {
         armPID.setInputRange(ARM_MIN, ARM_MAX);
         armPID.setOutputRange(-0.5, 0.5);         
         armPID.setSetpoint(ARM_MIN);
-        armPID.setTolerance(1.5);
+        armPID.setTolerance(3);
         // I can't contribute more then 0.2f speed in either direction
         //armPID.setMaxIContribution(0.2);
         // Total error won't start changing until less then 5 difference in error
         // between run loops
         armPID.setIKickInRate(5);
-        // Just here to remove the public constructor
-
+        
         enablePID();
     }
 
@@ -99,12 +98,6 @@ public class Arm implements Component {
         // called
         if (!closedLoop) {
             mSpeed = speed;
-            if (limitLower.get() && mSpeed < 0) {
-                mSpeed = 0;
-            }
-            if (limitUpper.get() && mSpeed > 0) {
-                mSpeed = 0;
-            }
         }
     }
 
@@ -119,6 +112,13 @@ public class Arm implements Component {
         //Lower limit switch will be the 0 position for the encoder
         if (limitLower.get()) {
             armEncoder.reset();
+
+            //This is an edge case where if you don't reset the PID (mainly integral error)
+            //When the arm reaches all the way down, it will oscilate because the PID speed
+            //will not be 0, but the limit switch speed will be 0
+            if(getSetpoint() == ARM_MIN) {
+                armPID.reset();
+            }
         }
 
         double armAngle = getNormalizedEncoder() * (ANGLE_MAX - ANGLE_MIN) + ANGLE_MIN;
@@ -127,11 +127,20 @@ public class Arm implements Component {
             //Get the degrees from the min that the arm is currently at and the adds the MIN
             //Possibly work this in as feed forward, does nothing for now
 
-            mSpeed = armPID.calculate(armEncoder.get(), Math.cos(Math.toRadians(armAngle)));
+            mSpeed = armPID.calculate(armEncoder.get());
         }
+
         double feedForward = Math.cos(Math.toRadians(armAngle));
-        
-        armMotor.set(mSpeed + feedForward * f.getDouble(0));
+        mSpeed += feedForward * f.getDouble(0);
+
+        if (limitLower.get() && mSpeed < 0) {
+            mSpeed = 0;
+        }
+        if (limitUpper.get() && mSpeed > 0) {
+            mSpeed = 0;
+        }
+
+        armMotor.set(mSpeed);
     }
 
     //Set the arm to the high position for placing hatches on the rocket
@@ -209,13 +218,13 @@ public class Arm implements Component {
     //Set to these constants when the arm is going down
     private void decreasingPID() {
         //0.01, 0.0001, 0.01, 0.1
-        armPID.setPIDF(downP.getDouble(0.01), downI.getDouble(0.0001), downD.getDouble(0.01), downF.getDouble(0));
+        armPID.setPID(p.getDouble(0.03), i.getDouble(0.001), d.getDouble(0.01));
     }
 
     //Set to these constants when the arm is going up
     private void increasingPID() {
         //0.06, 0.001, 0.03, 0.1
-        armPID.setPIDF(p.getDouble(0.06), i.getDouble(0.001), d.getDouble(0.03), f.getDouble(0));
+        armPID.setPID(p.getDouble(0.03), i.getDouble(0.001), d.getDouble(0.01));
     }
 
     //Returns the encoder scaled from 0-1 using the min and max height for it

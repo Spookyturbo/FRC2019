@@ -48,6 +48,8 @@ public class PIDControl extends SendableBase {
 
     private double minInput;
     private double maxInput;
+    private double inputRange;
+    private boolean continuous;
 
     private double setpoint;
 
@@ -129,7 +131,7 @@ public class PIDControl extends SendableBase {
     public double getF() {
         return kF;
     }
-
+    
     // Set the set point using the logic of min and max input
     public void setSetpoint(double setpoint) {
         if (maxInput > minInput) {
@@ -162,9 +164,13 @@ public class PIDControl extends SendableBase {
     public void setInputRange(double min, double max) {
         minInput = min;
         maxInput = max;
-
+        inputRange = max - min;
         // Update the setpoint to be in these values if changed mid run
         setSetpoint(setpoint);
+    }
+
+    public void setContinuous() {
+        continuous = true;
     }
 
     // Set the min and max values the PIDController can output
@@ -207,7 +213,7 @@ public class PIDControl extends SendableBase {
 
     // Uses reading given and feedforward term to determine speed based off error
     public double calculate(double input, double feedForward) {
-        error = setpoint - input;
+        error = getContinuousError(setpoint - input);
 
         double deltaError = error - previousError;
 
@@ -244,6 +250,22 @@ public class PIDControl extends SendableBase {
         previousError = error;
         return output;
     }
+
+    //For continous systems
+    double getContinuousError(double error) {
+        if (continuous && inputRange > 0) {
+          error %= inputRange;
+          if (Math.abs(error) > inputRange / 2) {
+            if (error > 0) {
+              return error - inputRange;
+            } else {
+              return error + inputRange;
+            }
+          }
+        }
+    
+        return error;
+      }
 
     // Returns the instantaneous moments for which the controller is on target
     public boolean onTarget() {

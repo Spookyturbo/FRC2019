@@ -123,6 +123,7 @@ public class Limelight {
     public double[] getYCorners() {
         return table.getEntry("tcorny").getDoubleArray(new double[] {0, 0, 0, 0});
     }
+    
     //Sets the LEDs to either On, Off, Blinking, or determined by the pipeline
     public void setLightState(LightMode lMode) {
         table.getEntry("ledMode").setNumber(lMode.getLedMode());

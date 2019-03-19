@@ -9,6 +9,7 @@ import frc.component.Intake;
 import frc.component.Jacks;
 import frc.component.Wrist;
 import frc.procedure.CameraAlign;
+import frc.sensor.Limelight;
 
 public class OI {
     // Administrator, DriveTrials, Competition
@@ -46,6 +47,7 @@ public class OI {
         Intake intake = Intake.getInstance();
 
         CameraAlign cameraAlign = CameraAlign.getInstance();
+        Limelight camera = Limelight.getInstance();
 
         public double getHorizontalDriveSpeed() {
             // Deadzone (Controller has a bit of issues centering from the right) (Think
@@ -64,53 +66,71 @@ public class OI {
 
         public void drive() {
             // Drive based off controls
-            drive.driveCartesian(getHorizontalDriveSpeed(), getVerticalDriveSpeed(), getRotationalDriveSpeed());
+            if(driver.getPOV() == 90) {
+                drive.driveCartesian(0.3, 0, 0);
+            }
+            else if(driver.getPOV() == 270) {
+                drive.driveCartesian(-0.3, 0, 0);
+            }
+            else {
+                drive.driveCartesian(getHorizontalDriveSpeed(), getVerticalDriveSpeed(), getRotationalDriveSpeed());
+            }
         }
 
         public void cameraDrive() {
             // Drive based off camera
-            if (driver.getRawButtonPressed(7)) {
-                cameraAlign.resetPID();
-            } else if (driver.getRawButton(7)) {
+            if(driver.getAButton()) { //Hatch placement
+                if(driver.getAButtonPressed()) {
+                    cameraAlign.resetPID();
+                    if(camera.getPipeIndex() != 1)
+                        camera.setPipeline(1);
+                }
                 cameraAlign.run();
             }
-        }
+            else if(driver.getXButton()) { //Hatch retrieval
+                if(driver.getXButtonPressed()) {
+                    cameraAlign.resetPID();
+                    if(camera.getPipeIndex() != 2)
+                        camera.setPipeline(2);
+                }
+                cameraAlign.run();
+            }
+            else if(driver.getYButton()) { //Cargo placement
+                if(driver.getYButtonPressed()) {
+                    cameraAlign.resetPID();
+                    if(camera.getPipeIndex() != 3)
+                        camera.setPipeline(3);
+                }
+                cameraAlign.run();
+            }
+        } 
 
         public void controlArm() {
-            arm.setSpeed(-assistant.getY(Hand.kLeft) * 0.65f);
+            double speed = -assistant.getY(Hand.kLeft) * 0.65f;
+
+            // Switch back to user control if using it
+            if (Math.abs(speed) > 0.2) {
+                arm.disablePID();
+            }
+
+            arm.setSpeed(speed);
         }
 
         public void controlArmPID() {
             // Toggle the PIDControl on the arm
-            if (assistant.getRawButtonPressed(8)) {
-                // Prevent arm from drastically moving when first pressed
-                arm.setSetpoint(arm.getEncoder());
-                if (arm.isPIDEnabled()) {
-                    arm.disablePID();
-                } else {
-                    arm.enablePID();
-                }
-            }
 
-            if (arm.isPIDEnabled()) {
-                double armAxis = -assistant.getY(Hand.kLeft) * 0.65f;
-
-                //Deadzone of 0.2
-                if(Math.abs(armAxis) > 0.2) {
-                    //Axis * maxEncoderChangePerSec * deltaTime;
-                    double deltaSetpoint = armAxis * 35 * 0.02f;
-                    arm.setSetpoint(arm.getSetpoint() + deltaSetpoint);
-                }
-
-                if (assistant.getAButton()) {
-                    arm.setLow();
-                } else if (assistant.getXButton()) {
-                    arm.setMiddle();
-                } else if (assistant.getYButton()) {
-                    arm.setHigh();
-                } else if (assistant.getBButton()) {
-                    arm.setDown();
-                }
+            if (assistant.getAButton()) {
+                arm.enablePID();
+                arm.setLow();
+            } else if (assistant.getXButton()) {
+                arm.enablePID();
+                arm.setMiddle();
+            } else if (assistant.getYButton()) {
+                arm.enablePID();
+                arm.setHigh();
+            } else if (assistant.getBButton()) {
+                arm.enablePID();
+                arm.setDown();
             }
         }
 
@@ -198,6 +218,15 @@ public class OI {
         public void controlWrist() {
             double wristSpeed = driver.getTriggerAxis(Hand.kLeft) - driver.getTriggerAxis(Hand.kRight); // Add the
             wrist.setSpeed(wristSpeed);
+        }
+
+        @Override
+        public void cameraDrive() {
+            if (driver.getRawButtonPressed(7)) {
+                cameraAlign.resetPID();
+            } else if (driver.getRawButton(7)) {
+                cameraAlign.run();
+            }
         }
 
         @Override
