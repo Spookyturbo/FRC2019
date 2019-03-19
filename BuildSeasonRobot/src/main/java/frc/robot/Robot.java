@@ -119,11 +119,11 @@ public class Robot extends TimedRobot {
         // Set the camera values
         Limelight.getInstance().setPipeline(1);
         Limelight.getInstance().setLightState(Limelight.LightMode.ON);
-        CameraAlign camera = CameraAlign.getInstance();
-        camera.align(5);
-        while(!camera.isCompleted()) {
-            camera.run();
-        }
+        // CameraAlign camera = CameraAlign.getInstance();
+        // camera.align(5);
+        // while(!camera.isCompleted()) {
+        //     camera.run();
+        // }
 
     }
 

@@ -66,30 +66,40 @@ public class OI {
 
         public void drive() {
             // Drive based off controls
-            drive.driveCartesian(getHorizontalDriveSpeed(), getVerticalDriveSpeed(), getRotationalDriveSpeed());
+            if(driver.getPOV() == 90) {
+                drive.driveCartesian(0.3, 0, 0);
+            }
+            else if(driver.getPOV() == 270) {
+                drive.driveCartesian(-0.3, 0, 0);
+            }
+            else {
+                drive.driveCartesian(getHorizontalDriveSpeed(), getVerticalDriveSpeed(), getRotationalDriveSpeed());
+            }
         }
 
         public void cameraDrive() {
             // Drive based off camera
-            if(driver.getAButtonPressed() || driver.getXButtonPressed() || driver.getYButtonPressed()) {
-                cameraAlign.resetPID();
-            }
-
             if(driver.getAButton()) { //Hatch placement
-                if(driver.getAButtonPressed() && camera.getPipeIndex() != 1) {
-                    camera.setPipeline(1);
+                if(driver.getAButtonPressed()) {
+                    cameraAlign.resetPID();
+                    if(camera.getPipeIndex() != 1)
+                        camera.setPipeline(1);
                 }
                 cameraAlign.run();
             }
             else if(driver.getXButton()) { //Hatch retrieval
-                if(driver.getXButtonPressed() && camera.getPipeIndex() != 2) {
-                    camera.setPipeline(2);
+                if(driver.getXButtonPressed()) {
+                    cameraAlign.resetPID();
+                    if(camera.getPipeIndex() != 2)
+                        camera.setPipeline(2);
                 }
                 cameraAlign.run();
             }
             else if(driver.getYButton()) { //Cargo placement
-                if(driver.getYButtonPressed() && camera.getPipeIndex() != 3) {
-                    camera.setPipeline(3);
+                if(driver.getYButtonPressed()) {
+                    cameraAlign.resetPID();
+                    if(camera.getPipeIndex() != 3)
+                        camera.setPipeline(3);
                 }
                 cameraAlign.run();
             }

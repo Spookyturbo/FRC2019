@@ -71,24 +71,27 @@ public class CameraAlign {
         // double leftCorner = yCorners[1];
         // double rightCorner = yCorners[0];
 
-        double strafingSpeed = -strafingController.calculate(camera.getXAngle());
-        double distanceSpeed = -distanceController.calculate(camera.getYAngle());
-        double rotationSpeed = rotationController.calculate(camera.getSkew());
+        if (camera.hasValidTarget()) {
+            double strafingSpeed = -strafingController.calculate(camera.getXAngle());
+            double distanceSpeed = -distanceController.calculate(camera.getYAngle());
+            double rotationSpeed = rotationController.calculate(camera.getSkew());
 
-        // if(leftCorner < rightCorner) {
-        //     rotationSpeed *= -1;   
-        // }
-        
-        //cant strafe and rotate at the same time unless less then this
-        // if(Math.abs(rotationSpeed) > 0.08) {
-        //     strafingSpeed = 0;
-        // }
+            // if(leftCorner < rightCorner) {
+            // rotationSpeed *= -1;
+            // }
 
-        //Strafe to the indicated position
-        drive.driveCartesian(strafingSpeed, distanceSpeed, rotationSpeed);
+            // cant strafe and rotate at the same time unless less then this
+            // if(Math.abs(rotationSpeed) > 0.08) {
+            // strafingSpeed = 0;
+            // }
+
+            // Strafe to the indicated position
+            drive.driveCartesian(strafingSpeed, distanceSpeed, rotationSpeed);
+        }
     }
 
-    //Runs the alignment for a set period of time until the timeout happens or is alligned
+    // Runs the alignment for a set period of time until the timeout happens or is
+    // alligned
     public void align(int timeout) {
         this.timeout = timeout;
         timer.reset();
@@ -97,23 +100,23 @@ public class CameraAlign {
         run();
     }
 
-    //Returns if correctly aligned
+    // Returns if correctly aligned
     public boolean isAlligned() {
         return strafingController.onTarget() && distanceController.onTarget() && rotationController.onTarget();
     }
 
     public boolean isCompleted() {
-        if(timer.hasPeriodPassed(timeout) || isAlligned()) {
+        if (timer.hasPeriodPassed(timeout) || isAlligned()) {
             timer.stop();
             return true;
         }
-        
+
         return false;
     }
 
-    //Should be called at the start of a move using this
-    //So that the derivative error and integral error
-    //start correctly
+    // Should be called at the start of a move using this
+    // So that the derivative error and integral error
+    // start correctly
     public void resetPID() {
         distanceController.reset();
         strafingController.reset();
@@ -121,7 +124,7 @@ public class CameraAlign {
     }
 
     public static CameraAlign getInstance() {
-        if(instance == null) {
+        if (instance == null) {
             instance = new CameraAlign();
         }
 
