@@ -152,14 +152,9 @@ public class Limelight {
     }
 
     //Enables and disables the camera taking snapshots
-    //While enabled the camera takes two snapshots evey second
-    public void takeSnapshots(boolean b) {
-        if(b) {
+    //Camera takes 1 snapshot then sets this value to 0
+    public void takeSnapshot() {
             table.getEntry("snapshot").setNumber(1);
-        }
-        else {
-            table.getEntry("snapshot").setNumber(0);
-        }
     }
 
     public static Limelight getInstance() {

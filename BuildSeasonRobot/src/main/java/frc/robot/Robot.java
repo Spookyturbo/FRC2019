@@ -117,7 +117,7 @@ public class Robot extends TimedRobot {
         }
         // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
         // Set the camera values
-        Limelight.getInstance().setPipeline(1);
+        Limelight.getInstance().setPipeline(0);
         Limelight.getInstance().setLightState(Limelight.LightMode.ON);
         // CameraAlign camera = CameraAlign.getInstance();
         // camera.align(5);
@@ -158,7 +158,7 @@ public class Robot extends TimedRobot {
         }
 
         // Set the camera values
-        Limelight.getInstance().setPipeline(1);
+        Limelight.getInstance().setPipeline(0);
         Limelight.getInstance().setLightState(Limelight.LightMode.ON);
     }
 

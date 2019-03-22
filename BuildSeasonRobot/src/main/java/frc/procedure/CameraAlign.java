@@ -28,9 +28,9 @@ public class CameraAlign {
     private int timeout;
     Timer timer = new Timer();
 
-    PIDControl distanceController = new PIDControl(0.1);
-    PIDControl strafingController = new PIDControl(0.1, 0.01);
-    PIDControl rotationController = new PIDControl(0.05, 0.001);
+    public PIDControl distanceController = new PIDControl(0.1);
+    public PIDControl strafingController = new PIDControl(0.1, 0.01);
+    public PIDControl rotationController = new PIDControl(0.05, 0.001);
 
     private CameraAlign() {
         distanceController.setOutputRange(-0.5, 0.5);
@@ -47,7 +47,7 @@ public class CameraAlign {
 
         distanceController.setSetpoint(0);
         strafingController.setSetpoint(0);
-        rotationController.setSetpoint(-86);
+        rotationController.setSetpoint(0);
 
         rotationController.setContinuous();
 
