@@ -47,7 +47,7 @@ public class CameraAlign {
 
         distanceController.setSetpoint(0);
         strafingController.setSetpoint(0);
-        rotationController.setSetpoint(-1.6);
+        rotationController.setSetpoint(-86);
 
         rotationController.setContinuous();
 
