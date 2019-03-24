@@ -9,13 +9,9 @@ package frc.procedure;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.component.Drive;
-import frc.robot.OI;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.sensor.PIDControl;
-import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj.SPI.Port;
 
 import com.kauailabs.navx.frc.AHRS;
 
@@ -31,7 +27,7 @@ public class GyroTurning {
 
     private static GyroTurning instance;
     
-    public GyroTurning() {
+    private GyroTurning() {
         init();
     }
     
@@ -64,11 +60,14 @@ public class GyroTurning {
 
     //Scale the angle input between -180 and 180
     public void setAngle(double angle) {
-        turnController.reset();
         turnController.setSetpoint(angle);
     }
 
-    public boolean atTarget() {
+    public double getAngle() {
+        return gyro.getAngle();
+    }
+
+    public boolean onTarget() {
         return turnController.onTarget();
     }
 
@@ -80,7 +79,7 @@ public class GyroTurning {
         turnController.reset();
     }
 
-    public GyroTurning getInstance() {
+    public static GyroTurning getInstance() {
         if(instance == null) {
             instance = new GyroTurning();
         }

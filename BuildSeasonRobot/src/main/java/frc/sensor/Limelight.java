@@ -123,7 +123,27 @@ public class Limelight {
     public double[] getYCorners() {
         return table.getEntry("tcorny").getDoubleArray(new double[] {0, 0, 0, 0});
     }
+
+    //Returns the crosshair position in screen space from -1 to 1
+    public double getRawXCrosshair() {
+        return table.getEntry("cx0").getDouble(0);
+    }
+
+    //Returns the crosshair position in screen space from -1 to 1
+    public double getRawYCrosshair() {
+        return table.getEntry("cx1").getDouble(0);
+    }
     
+    //returns the crosshair position in angle space from -27 to 27
+    public double getXCrosshair() {
+        return getRawXCrosshair() * 27;
+    }
+
+    //returns the crosshair position in angle space from -20.5 to 20.5
+    public double getYCrosshair() {
+        return getRawYCrosshair() * 20.5d;
+    }
+
     //Sets the LEDs to either On, Off, Blinking, or determined by the pipeline
     public void setLightState(LightMode lMode) {
         table.getEntry("ledMode").setNumber(lMode.getLedMode());

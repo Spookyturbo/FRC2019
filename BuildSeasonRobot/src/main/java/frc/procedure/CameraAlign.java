@@ -30,63 +30,51 @@ public class CameraAlign {
 
     public PIDControl distanceController = new PIDControl(0.1);
     public PIDControl strafingController = new PIDControl(0.1, 0.01);
-    public PIDControl rotationController = new PIDControl(0.05, 0.001);
+    GyroTurning rotationController = GyroTurning.getInstance();
+
+    double[] gamePieceAngles = {-90, 90, 180, 0, 151.25, -151.25, 28.75, -28.75};
 
     private CameraAlign() {
         distanceController.setOutputRange(-0.5, 0.5);
         strafingController.setOutputRange(-0.5, 0.5);
-        rotationController.setOutputRange(-0.5, 0.5);
 
         distanceController.setInputRange(-20.5, 20.5);
         strafingController.setInputRange(-27, 27);
-        rotationController.setInputRange(-90, 0);
 
         distanceController.setTolerance(0.5);
         strafingController.setTolerance(0.5);
-        rotationController.setTolerance(1);
 
         distanceController.setSetpoint(0);
         strafingController.setSetpoint(0);
-        rotationController.setSetpoint(0);
 
-        rotationController.setContinuous();
 
         strafingController.setMaxIContribution(0.3f);
         strafingController.setIKickInRate(2);
 
-        rotationController.setIKickInRate(2);
-
         // strafingController.initSmartDashboard("CameraStrafe");
         // distanceController.initSmartDashboard("CameraDistance");
-        // rotationController.initSmartDashboard("CameraRotation");
         // LiveWindow.add(strafingController);
     }
 
     public void run() {
         // strafingController.updateFromSmartDashboard("CameraStrafe");
         // distanceController.updateFromSmartDashboard("CameraDistance");
-        // rotationController.updateFromSmartDashboard("CameraRotation");
-        // double[] yCorners = camera.getYCorners();
-
-        // double leftCorner = yCorners[1];
-        // double rightCorner = yCorners[0];
-
         if (camera.hasValidTarget()) {
+            double angle = rotationController.getAngle() + (camera.getXAngle() + camera.getXCrosshair()); //adds the angle from center of camera to angle
             double strafingSpeed = -strafingController.calculate(camera.getXAngle());
             double distanceSpeed = -distanceController.calculate(camera.getYAngle());
-            double rotationSpeed = rotationController.calculate(camera.getSkew());
 
-            // if(leftCorner < rightCorner) {
-            // rotationSpeed *= -1;
-            // }
-
-            // cant strafe and rotate at the same time unless less then this
-            // if(Math.abs(rotationSpeed) > 0.08) {
-            // strafingSpeed = 0;
-            // }
+            rotationController.setAngle(findClosestDouble(angle, gamePieceAngles));
 
             // Strafe to the indicated position
-            drive.driveCartesian(strafingSpeed, distanceSpeed, rotationSpeed);
+            /*   ^
+                 0
+            -90     90
+                180
+            ____________
+            */
+            //-90, 90, 180, 0, 151.25, -151.25, 28.75, -28.75
+            drive.driveCartesian(strafingSpeed, distanceSpeed, rotationController.getSpeed());
         }
     }
 
@@ -120,7 +108,7 @@ public class CameraAlign {
     public void resetPID() {
         distanceController.reset();
         strafingController.reset();
-        rotationController.reset();
+        rotationController.resetPID();
     }
 
     public static CameraAlign getInstance() {
@@ -129,5 +117,19 @@ public class CameraAlign {
         }
 
         return instance;
+    }
+
+    public double findClosestDouble(double n, double[] values) {
+        double bestN = values[0];
+        double smallestDistance = Math.abs(n - bestN);
+
+        for(int i = 0; i < values.length; i++) {
+            if(Math.abs(n - values[i]) < smallestDistance) {
+                bestN = values[i];
+                smallestDistance = Math.abs(n - bestN);
+            }
+        }
+
+        return bestN;
     }
 }

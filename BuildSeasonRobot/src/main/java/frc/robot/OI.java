@@ -84,7 +84,6 @@ public class OI {
                     cameraAlign.resetPID();
                     if(camera.getPipeIndex() != 0) {
                         camera.setPipeline(0);
-                        cameraAlign.rotationController.setSetpoint(0);
                     }
                     camera.takeSnapshot();
                 }
@@ -98,7 +97,6 @@ public class OI {
                     cameraAlign.resetPID();
                     if(camera.getPipeIndex() != 1) {
                         camera.setPipeline(1);
-                        cameraAlign.rotationController.setSetpoint(-86);
                     }
                     camera.takeSnapshot();
                 }
@@ -112,7 +110,6 @@ public class OI {
                     cameraAlign.resetPID();
                     if(camera.getPipeIndex() != 2) {
                         camera.setPipeline(2);
-                        cameraAlign.rotationController.setSetpoint(0);
                     }
                     camera.takeSnapshot();
                 }
