@@ -61,7 +61,7 @@ public class Drive implements Component {
         // tankDrive = new DifferentialDrive(leftMotors, rightMotors);
     }
 
-    // Mecanum Drive
+    // Mecanum Drive X is forwards/backwards y is left/right
     public void driveCartesian(double ySpeed, double xSpeed, double rotate) {
         mecanum = true;
         this.ySpeed = ySpeed;
@@ -86,6 +86,18 @@ public class Drive implements Component {
             // X = left Y = right
             // tankDrive.tankDrive(xSpeed, ySpeed);
         }
+    }
+
+    public double getHorizontalSpeed() {
+        return ySpeed;
+    }
+
+    public double getVerticalSpeed() {
+        return xSpeed;
+    }
+
+    public double getRotationalSpeed() {
+        return rotate;
     }
 
     public void invertX(boolean b) {
