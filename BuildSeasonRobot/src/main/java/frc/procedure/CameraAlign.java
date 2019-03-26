@@ -32,7 +32,11 @@ public class CameraAlign {
     public PIDControl strafingController = new PIDControl(0.1, 0.01);
     GyroTurning rotationController = GyroTurning.getInstance();
 
-    double[] gamePieceAngles = {-90, 90, 180, -180, 0, 360, -360, 151.25, -151.25, 28.75, -28.75};
+    double[] hatchAngles = {-90, 90, 0, 360, -360, 151.25, -151.25, 28.75, -28.75};
+    double[] hatchRetrieval = {180, -180};
+    double[] rocketCargo = {90, -90};
+
+    double[] currentAngles;
 
     private CameraAlign() {
         distanceController.setOutputRange(-0.5, 0.5);
@@ -56,6 +60,21 @@ public class CameraAlign {
         // LiveWindow.add(strafingController);
     }
 
+    public void setAlignHatch() {
+        currentAngles = hatchAngles;
+        camera.setPipeline(0);
+    }
+
+    public void setAlignRetrieval() {
+        currentAngles = hatchRetrieval;
+        camera.setPipeline(1);
+    }
+
+    public void setAlignRocketCargo() {
+        currentAngles = rocketCargo;
+        camera.setPipeline(2);
+    }
+
     public void run() {
         // strafingController.updateFromSmartDashboard("CameraStrafe");
         // distanceController.updateFromSmartDashboard("CameraDistance");
@@ -63,9 +82,9 @@ public class CameraAlign {
             double angle = rotationController.getAngle(); //adds the angle from center of camera to angle
             double strafingSpeed = -strafingController.calculate(camera.getXAngle());
             double distanceSpeed = -distanceController.calculate(camera.getYAngle());
-            double closestAngle = findClosestDouble(angle, gamePieceAngles);
+            double closestAngle = findClosestDouble(angle, currentAngles);
             rotationController.setAngle(closestAngle);
-            System.out.println("ClosestAngle: " + closestAngle);
+
             // Strafe to the indicated position
             /*   ^
                  0

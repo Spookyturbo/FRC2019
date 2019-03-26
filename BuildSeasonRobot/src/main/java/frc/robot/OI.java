@@ -82,9 +82,7 @@ public class OI {
             if(driver.getAButton()) { //Hatch placement
                 if(driver.getAButtonPressed()) {
                     cameraAlign.resetPID();
-                    if(camera.getPipeIndex() != 0) {
-                        camera.setPipeline(0);
-                    }
+                    cameraAlign.setAlignHatch();
                     camera.takeSnapshot();
                 }
                 else if(driver.getAButtonReleased()) {
@@ -95,9 +93,7 @@ public class OI {
             else if(driver.getXButton()) { //Hatch retrieval
                 if(driver.getXButtonPressed()) {
                     cameraAlign.resetPID();
-                    if(camera.getPipeIndex() != 1) {
-                        camera.setPipeline(1);
-                    }
+                    cameraAlign.setAlignRetrieval();
                     camera.takeSnapshot();
                 }
                 else if(driver.getXButtonReleased()) {
@@ -108,9 +104,7 @@ public class OI {
             else if(driver.getYButton()) { //Cargo placement
                 if(driver.getYButtonPressed()) {
                     cameraAlign.resetPID();
-                    if(camera.getPipeIndex() != 2) {
-                        camera.setPipeline(2);
-                    }
+                    cameraAlign.setAlignRocketCargo();
                     camera.takeSnapshot();
                 }
                 else if(driver.getYButtonReleased()) {
