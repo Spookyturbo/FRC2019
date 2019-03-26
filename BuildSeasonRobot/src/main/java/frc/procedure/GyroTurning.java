@@ -12,6 +12,7 @@ import frc.component.Drive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.sensor.PIDControl;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 
 import com.kauailabs.navx.frc.AHRS;
 
@@ -32,11 +33,11 @@ public class GyroTurning {
     }
     
 	public void init() {
-        turnController = new PIDControl(0.03, 0, 0.05);
+        turnController = new PIDControl(0.02, 0, 0);
 
         turnController.setInputRange(-180.0f, 180.0f);
         turnController.setOutputRange(-0.5, 0.5);
-        turnController.setTolerance(2);
+        turnController.setTolerance(1);
         turnController.setContinuous();
         turnController.setSetpoint(0);
 
@@ -45,17 +46,24 @@ public class GyroTurning {
             gyro.setName("Gyro", "Angle");
             gyro.reset();
         } catch(Exception e) {System.out.println("Gyro could not initialize!");}
+
+        turnController.setName("GyroTuning");
+        turnController.initSmartDashboard("GyroTuning");
     }
 
     public double run() {
+        turnController.updateFromSmartDashboard("GyroTuning");
+        
         double motorSpeed = turnController.calculate(gyro.getAngle());
-
         drive.driveCartesian(drive.getHorizontalSpeed(), drive.getVerticalSpeed(), motorSpeed);
         return turnRate;
     }
 
     public double getSpeed() {
-        return turnController.calculate(gyro.getAngle());
+        turnController.updateFromSmartDashboard("GyroTuning");
+        double motorSpeed = turnController.calculate(gyro.getAngle());
+        System.out.println("Gyro Angle: " + gyro.getAngle() + " Motor Speed: " + motorSpeed + " Setpoint: " + turnController.getSetpoint());
+        return motorSpeed;
     }
 
     //Scale the angle input between -180 and 180
@@ -64,7 +72,8 @@ public class GyroTurning {
     }
 
     public double getAngle() {
-        return gyro.getAngle();
+        //Returns the remainder where the quotient = the closest integer (Ex: -181/380 = -1r179 returns 179)
+        return Math.IEEEremainder(gyro.getAngle(), 360);
     }
 
     public boolean onTarget() {

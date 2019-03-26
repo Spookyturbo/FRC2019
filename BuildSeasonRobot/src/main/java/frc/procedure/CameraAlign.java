@@ -32,7 +32,7 @@ public class CameraAlign {
     public PIDControl strafingController = new PIDControl(0.1, 0.01);
     GyroTurning rotationController = GyroTurning.getInstance();
 
-    double[] gamePieceAngles = {-90, 90, 180, 0, 151.25, -151.25, 28.75, -28.75};
+    double[] gamePieceAngles = {-90, 90, 180, -180, 0, 360, -360, 151.25, -151.25, 28.75, -28.75};
 
     private CameraAlign() {
         distanceController.setOutputRange(-0.5, 0.5);
@@ -60,12 +60,12 @@ public class CameraAlign {
         // strafingController.updateFromSmartDashboard("CameraStrafe");
         // distanceController.updateFromSmartDashboard("CameraDistance");
         if (camera.hasValidTarget()) {
-            double angle = rotationController.getAngle() + (camera.getXAngle() + camera.getXCrosshair()); //adds the angle from center of camera to angle
+            double angle = rotationController.getAngle(); //adds the angle from center of camera to angle
             double strafingSpeed = -strafingController.calculate(camera.getXAngle());
             double distanceSpeed = -distanceController.calculate(camera.getYAngle());
-
-            rotationController.setAngle(findClosestDouble(angle, gamePieceAngles));
-
+            double closestAngle = findClosestDouble(angle, gamePieceAngles);
+            rotationController.setAngle(closestAngle);
+            System.out.println("ClosestAngle: " + closestAngle);
             // Strafe to the indicated position
             /*   ^
                  0
@@ -73,7 +73,7 @@ public class CameraAlign {
                 180
             ____________
             */
-            //-90, 90, 180, 0, 151.25, -151.25, 28.75, -28.75
+            //-90, 90, 180, -180, 0, 151.25, -151.25, 28.75, -28.75
             drive.driveCartesian(strafingSpeed, distanceSpeed, rotationController.getSpeed());
         }
     }

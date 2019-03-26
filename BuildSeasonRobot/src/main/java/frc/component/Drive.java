@@ -81,7 +81,6 @@ public class Drive implements Component {
     public void execute() {
         if (mecanum) {
             mecanumDrive.driveCartesian(ySpeed, xSpeed, rotate);
-
         } else {
             // X = left Y = right
             // tankDrive.tankDrive(xSpeed, ySpeed);
