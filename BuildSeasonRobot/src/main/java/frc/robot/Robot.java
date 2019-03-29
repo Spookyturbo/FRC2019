@@ -112,13 +112,12 @@ public class Robot extends TimedRobot {
         // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
         // Set the camera values
         Limelight.getInstance().setPipeline(0);
-        Limelight.getInstance().setLightState(Limelight.LightMode.ON);
         // CameraAlign camera = CameraAlign.getInstance();
         // camera.align(5);
         // while(!camera.isCompleted()) {
         //     camera.run();
         // }
-            GyroTurning.getInstance().resetGyro();
+        GyroTurning.getInstance().resetGyro();
     }
 
     /**
@@ -126,21 +125,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void autonomousPeriodic() {
-
-        controlProfile.drive();
-        controlProfile.cameraDrive();
-
-        controlProfile.controlArm();
-        controlProfile.controlArmPID();
-
-        controlProfile.controlFrontJacks();
-        controlProfile.controlRearJackWheel();
-        controlProfile.controlRearJacks();
-
-        controlProfile.controlWrist();
-        controlProfile.controlIntake();
-
-        updateAllComponents();
+        teleopPeriodic();
     }
 
     @Override
@@ -153,7 +138,6 @@ public class Robot extends TimedRobot {
 
         // Set the camera values
         Limelight.getInstance().setPipeline(0);
-        Limelight.getInstance().setLightState(Limelight.LightMode.ON);
     }
 
     /**

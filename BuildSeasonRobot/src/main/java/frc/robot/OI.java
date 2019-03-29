@@ -10,6 +10,7 @@ import frc.component.Jacks;
 import frc.component.Wrist;
 import frc.procedure.CameraAlign;
 import frc.sensor.Limelight;
+import frc.sensor.Limelight.LightMode;
 
 public class OI {
     // Administrator, DriveTrials, Competition
@@ -79,38 +80,56 @@ public class OI {
 
         public void cameraDrive() {
             // Drive based off camera
-            if(driver.getAButton()) { //Hatch placement
+
+            //Hatch Alignment
+            if(driver.getAButton()) {
                 if(driver.getAButtonPressed()) {
+                    camera.setLightState(LightMode.ON);
                     cameraAlign.resetPID();
                     cameraAlign.setAlignHatch();
                     camera.takeSnapshot();
                 }
-                else if(driver.getAButtonReleased()) {
-                    camera.takeSnapshot();
-                }
                 cameraAlign.run();
             }
+            else if(driver.getAButtonReleased()) {
+                camera.takeSnapshot();
+                camera.setLightState(LightMode.OFF);
+            }
+            //Retrieval Alignment
             else if(driver.getXButton()) { //Hatch retrieval
                 if(driver.getXButtonPressed()) {
+                    camera.setLightState(LightMode.ON);
                     cameraAlign.resetPID();
                     cameraAlign.setAlignRetrieval();
                     camera.takeSnapshot();
                 }
-                else if(driver.getXButtonReleased()) {
-                    camera.takeSnapshot();
-                }
                 cameraAlign.run();
             }
-            else if(driver.getYButton()) { //Cargo placement
+            else if(driver.getXButtonReleased()) {
+                camera.takeSnapshot();
+                camera.setLightState(LightMode.OFF);
+            }
+            //Cargo Alignment
+            else if(driver.getYButton()) {
                 if(driver.getYButtonPressed()) {
+                    camera.setLightState(LightMode.ON);
                     cameraAlign.resetPID();
                     cameraAlign.setAlignRocketCargo();
                     camera.takeSnapshot();
                 }
-                else if(driver.getYButtonReleased()) {
-                    camera.takeSnapshot();
-                }
                 cameraAlign.run();
+            }
+            else if(driver.getYButtonReleased()) {
+                camera.takeSnapshot();
+                camera.setLightState(LightMode.OFF);
+            }
+            
+            //Manual Light Control
+            if(driver.getRawButtonPressed(8)) {
+                camera.setLightState(LightMode.ON);
+            }
+            else if(driver.getRawButtonPressed(7)) {
+                camera.setLightState(LightMode.OFF);
             }
         } 
 

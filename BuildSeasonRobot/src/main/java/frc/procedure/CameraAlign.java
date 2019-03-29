@@ -32,7 +32,7 @@ public class CameraAlign {
     public PIDControl strafingController = new PIDControl(0.1, 0.01);
     GyroTurning rotationController = GyroTurning.getInstance();
 
-    double[] hatchAngles = {-90, 90, 0, 360, -360, 151.25, -151.25, 28.75, -28.75};
+    double[] hatchAngles = {-90, 90, 0, 151.25, -151.25, 28.75, -28.75};
     double[] hatchRetrieval = {180, -180};
     double[] rocketCargo = {90, -90};
 
@@ -89,7 +89,7 @@ public class CameraAlign {
             /*   ^
                  0
             -90     90
-                180
+             -180/180
             ____________
             */
             //-90, 90, 180, -180, 0, 151.25, -151.25, 28.75, -28.75
