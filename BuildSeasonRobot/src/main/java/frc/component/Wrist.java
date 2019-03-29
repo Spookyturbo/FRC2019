@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.robot.RobotMap;
+import frc.sensor.PIDControl;
 import frc.util.Component;
 import frc.util.Debug;
 
@@ -25,22 +26,33 @@ public class Wrist implements Component {
     
     WPI_VictorSPX motor = new WPI_VictorSPX(RobotMap.Motors.wrist);
 
+    PIDControl pid = new PIDControl(0.1f);
+
     DigitalInput lowerLimitSwitch = new DigitalInput(RobotMap.limitSwitches.wristDown);
     DigitalInput upperLimitSwitch = new DigitalInput(RobotMap.limitSwitches.wristUp);
 
-    DigitalInput wristRotationCount = new DigitalInput(18);
-    Counter wristEncoder = new Counter(wristRotationCount);
+    Counter wristCounter = new Counter(RobotMap.Encoders.wrist);
+    int encoderValue = 0;
+    int lastWrist = 0;
+    //False = down, true = up
+    boolean lastDirectionUp = false;
 
     double mSpeed;
 
     private Wrist() {
         // Just here to remove the public constructor
+        pid.setInputRange(0, 47);
+        pid.setOutputRange(-1, 1);
+        pid.setTolerance(2);
+        pid.setSetpoint(15);
     }
 
     public void setSpeed(double speed) {
         mSpeed = speed;
 
         if (upperLimitSwitch.get()) {
+            wristCounter.reset();
+            encoderValue = 0;
             mSpeed = Math.min(mSpeed, 0);
         } else if (lowerLimitSwitch.get()) {
             mSpeed = Math.max(mSpeed, 0);
@@ -49,9 +61,23 @@ public class Wrist implements Component {
 
     @Override
     public void execute() {
-        // Code ran every loop
+        int deltaCounter = wristCounter.get() - lastWrist;
+
+        //Add some directional control to the counter based on the motor
+        if(mSpeed > 0) {
+            encoderValue -= deltaCounter;
+            lastDirectionUp = true;
+        }
+        else if(mSpeed < 0){
+            encoderValue += deltaCounter;
+            lastDirectionUp = false;
+        }
+        //For when the motor is passively falling due to gravity or something, keep going in previous direction
+        else {
+            encoderValue += (lastDirectionUp) ? -deltaCounter : deltaCounter;
+        }
+
         motor.set(mSpeed);
-        //System.out.println(wristEncoder.get());
     }
 
     public void initDebug() {

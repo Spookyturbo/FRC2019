@@ -86,8 +86,6 @@ public class Arm implements Component {
         // Total error won't start changing until less then 5 difference in error
         // between run loops
         armPID.setIKickInRate(5);
-        
-        enablePID();
     }
 
     //Set the power of the motor. Scaled from -1 to 1 for -100% to 100% power
