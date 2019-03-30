@@ -163,7 +163,16 @@ public class OI {
         }
 
         public void controlWrist() {
-            wrist.setSpeed(-assistant.getY(Hand.kRight) * 0.6f);
+            double speed = -assistant.getY(Hand.kRight) * 0.6f;
+            if(assistant.getRawButtonPressed(8)) {
+                wrist.setPositionUp();
+            }
+
+            if(Math.abs(speed) > 0.1) {
+                wrist.disablePID();
+            }
+
+            wrist.setSpeed(speed);
         }
 
         public void controlFrontJacks() {

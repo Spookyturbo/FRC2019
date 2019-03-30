@@ -26,13 +26,14 @@ public class Wrist implements Component {
     
     WPI_VictorSPX motor = new WPI_VictorSPX(RobotMap.Motors.wrist);
 
-    PIDControl pid = new PIDControl(0.1f);
+    PIDControl pid = new PIDControl(0.1);
+    boolean closedLoop = false;
 
     DigitalInput lowerLimitSwitch = new DigitalInput(RobotMap.limitSwitches.wristDown);
     DigitalInput upperLimitSwitch = new DigitalInput(RobotMap.limitSwitches.wristUp);
 
     Counter wristCounter = new Counter(RobotMap.Encoders.wrist);
-    int encoderValue = 0;
+    int wristPosition = 0;
     int lastWrist = 0;
     //False = down, true = up
     boolean lastDirectionUp = false;
@@ -41,10 +42,18 @@ public class Wrist implements Component {
 
     private Wrist() {
         // Just here to remove the public constructor
-        pid.setInputRange(0, 47);
-        pid.setOutputRange(-1, 1);
+        pid.setInputRange(0, 100);
+        pid.setOutputRange(-0.6, 0.6);
         pid.setTolerance(2);
         pid.setSetpoint(15);
+    }
+
+    public void setPositionUp() {
+        closedLoop = true;
+    }
+
+    public void disablePID() {
+        closedLoop = false;
     }
 
     public void setSpeed(double speed) {
@@ -52,32 +61,39 @@ public class Wrist implements Component {
 
         if (upperLimitSwitch.get()) {
             wristCounter.reset();
-            encoderValue = 0;
+            wristPosition = 0;
             mSpeed = Math.min(mSpeed, 0);
         } else if (lowerLimitSwitch.get()) {
             mSpeed = Math.max(mSpeed, 0);
+            wristPosition = 51;
         }
     }
 
     @Override
     public void execute() {
-        int deltaCounter = wristCounter.get() - lastWrist;
+        if(closedLoop) {
+            mSpeed = -pid.calculate(wristPosition);
+        }
 
+        int wristCount = wristCounter.get();
+        int deltaCounter = wristCount - lastWrist;
+        lastWrist = wristCount;
         //Add some directional control to the counter based on the motor
         if(mSpeed > 0) {
-            encoderValue -= deltaCounter;
+            wristPosition -= deltaCounter;
             lastDirectionUp = true;
         }
         else if(mSpeed < 0){
-            encoderValue += deltaCounter;
+            wristPosition += deltaCounter;
             lastDirectionUp = false;
         }
         //For when the motor is passively falling due to gravity or something, keep going in previous direction
         else {
-            encoderValue += (lastDirectionUp) ? -deltaCounter : deltaCounter;
+            wristPosition += (lastDirectionUp) ? -deltaCounter : deltaCounter;
         }
 
         motor.set(mSpeed);
+        System.out.println("WristPosition: " + wristPosition + " Counter Position: " + wristCounter.get());
     }
 
     public void initDebug() {
