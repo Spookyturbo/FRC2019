@@ -29,6 +29,7 @@ public class CameraAlign {
     Timer timer = new Timer();
 
     public PIDControl strafingController = new PIDControl(0.1, 0.01);
+    public PIDControl distanceController = new PIDControl(0.15);
     GyroTurning rotationController = GyroTurning.getInstance();
 
     double[] hatchAngles = {-90, 90, 0, 151.25, -151.25, 28.75, -28.75};
@@ -57,18 +58,21 @@ public class CameraAlign {
     public void setAlignHatch() {
         currentAngles = hatchAngles;
         camera.setPipeline(0);
+        distanceController.setSetpoint(3.5);
         //Distance Area 3.5
     }
 
     public void setAlignRetrieval() {
         currentAngles = hatchRetrieval;
         camera.setPipeline(1);
+        distanceController.setSetpoint(6.2499);
         //Distance area 6.2499
     }
 
     public void setAlignRocketCargo() {
         currentAngles = rocketCargo;
         camera.setPipeline(2);
+        distanceController.setSetpoint(2.147);
         //Distance area 2.147
     }
 
@@ -77,6 +81,7 @@ public class CameraAlign {
         if (camera.hasValidTarget()) {
             double angle = rotationController.getAngle(); //adds the angle from center of camera to angle
             double strafingSpeed = -strafingController.calculate(camera.getXAngle());
+            double distanceSpeed = distanceController.calculate(camera.getArea());
             double closestAngle = findClosestDouble(angle, currentAngles);
             rotationController.setAngle(closestAngle);
 
@@ -88,7 +93,7 @@ public class CameraAlign {
             ____________
             */
             //-90, 90, 180, -180, 0, 151.25, -151.25, 28.75, -28.75
-            drive.driveCartesian(strafingSpeed, drive.getVerticalSpeed(), rotationController.getSpeed());
+            drive.driveCartesian(strafingSpeed, distanceSpeed, rotationController.getSpeed());
         }
     }
 
