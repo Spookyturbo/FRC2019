@@ -136,6 +136,10 @@ public class OI {
         public void controlArm() {
             double speed = -assistant.getY(Hand.kLeft) * 0.65f;
 
+            if(assistant.getRawButton(7)){
+                arm.overrideLimit();
+            }
+
             // Switch back to user control if using it
             if (Math.abs(speed) > 0.2) {
                 arm.disablePID();
