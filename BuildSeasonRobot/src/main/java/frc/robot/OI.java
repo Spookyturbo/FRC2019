@@ -17,6 +17,7 @@ public class OI {
     public static final String ADMIN_PROFILE = "Administrator";
     public static final String MAIN_DRIVER_PROFILE = "Feaven";
     public static final String LOGITECH_CONTROLLER = "Logitech";
+    public static final String JOYSTICK_CONTROLLER = "Joystick";
 
     // Create and return the profile
     public static DriverProfile getProfile(String profile) {
@@ -28,6 +29,8 @@ public class OI {
             return new LogitechProfile();
         case ADMIN_PROFILE:
             return new AdminProfile();
+        case JOYSTICK_CONTROLLER:
+            return new JoystickProfile();
         }
     }
 
@@ -216,6 +219,69 @@ public class OI {
         }
     }
 
+    static class JoystickProfile extends DriverProfile {
+        @Override
+        public void controlFrontJacks() {
+            //Do nothing, inoperable in this mode.
+            return;
+        }
+
+        @Override
+        public void controlArmPID() {
+            //Do nothing, inoperable in this mode.
+            arm.disablePID();
+            return;
+        }
+
+        @Override
+        public void cameraDrive() {
+            //Do nothing, inoperable in this mode.
+            return;
+        }
+
+        @Override
+        public void controlWrist() {
+            wrist.setSpeed(assistant.getRawAxis(1));
+        }
+
+        @Override
+        public void controlRearJacks() {
+            //Inoperable, do nothing in this mode
+            return;
+        }
+        @Override
+        public void controlArm() {
+            //up
+            if(assistant.getRawButton(10)) {
+                arm.setSpeed(-0.65);
+            }
+            else if(assistant.getRawButton(11)) {
+                arm.setSpeed(0.65);
+            }
+            else {
+                arm.setSpeed(0);
+            }
+        }
+
+        @Override
+        public void controlRearJackWheel() {
+            //Do nothing, inoperable in this mode.
+            return;
+        }
+
+        @Override
+        public void controlIntake() {
+            if(assistant.getRawButton(7)) {
+                intake.setSpeed(-0.5f);
+            }
+            else if(assistant.getRawButton(6)) {
+                intake.setSpeed(0.5f);
+            }
+            else {
+                intake.setSpeed(0);
+            }
+        }
+    }
     // ---------------------------------------Logitech----------------------------------
     static class LogitechProfile extends DriverProfile {
         @Override

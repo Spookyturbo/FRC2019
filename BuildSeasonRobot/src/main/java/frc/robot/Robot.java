@@ -84,6 +84,7 @@ public class Robot extends TimedRobot {
         m_chooser.setDefaultOption("Feaven", OI.MAIN_DRIVER_PROFILE);
         m_chooser.addOption("Logitech", OI.LOGITECH_CONTROLLER);
         m_chooser.addOption("Admin", OI.ADMIN_PROFILE);
+        m_chooser.addOption("Joystick", OI.JOYSTICK_CONTROLLER);
 
         SmartDashboard.putData("Driver Mode", m_chooser);
 

@@ -40,12 +40,16 @@ public class CameraAlign {
 
     private CameraAlign() {
         strafingController.setOutputRange(-0.5, 0.5);
+        distanceController.setOutputRange(-0.5, 0.5);
 
         strafingController.setInputRange(-27, 27);
+        distanceController.setInputRange(0, 100);
 
         strafingController.setTolerance(0.5);
+        distanceController.setTolerance(0.2);
 
         strafingController.setSetpoint(0);
+        distanceController.setSetpoint(4);
 
 
         strafingController.setMaxIContribution(0.3f);
@@ -81,7 +85,7 @@ public class CameraAlign {
         if (camera.hasValidTarget()) {
             double angle = rotationController.getAngle(); //adds the angle from center of camera to angle
             double strafingSpeed = -strafingController.calculate(camera.getXAngle());
-            double distanceSpeed = distanceController.calculate(camera.getArea());
+            double distanceSpeed = -distanceController.calculate(camera.getArea());
             double closestAngle = findClosestDouble(angle, currentAngles);
             rotationController.setAngle(closestAngle);
 
