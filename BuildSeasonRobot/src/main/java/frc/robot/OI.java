@@ -10,12 +10,14 @@ import frc.component.Jacks;
 import frc.component.Wrist;
 import frc.procedure.CameraAlign;
 import frc.sensor.Limelight;
+import frc.sensor.Limelight.LightMode;
 
 public class OI {
     // Administrator, DriveTrials, Competition
     public static final String ADMIN_PROFILE = "Administrator";
     public static final String MAIN_DRIVER_PROFILE = "Feaven";
     public static final String LOGITECH_CONTROLLER = "Logitech";
+    public static final String JOYSTICK_CONTROLLER = "Joystick";
 
     // Create and return the profile
     public static DriverProfile getProfile(String profile) {
@@ -27,6 +29,8 @@ public class OI {
             return new LogitechProfile();
         case ADMIN_PROFILE:
             return new AdminProfile();
+        case JOYSTICK_CONTROLLER:
+            return new JoystickProfile();
         }
     }
 
@@ -79,34 +83,65 @@ public class OI {
 
         public void cameraDrive() {
             // Drive based off camera
-            if(driver.getAButton()) { //Hatch placement
+
+            //Hatch Alignment
+            if(driver.getAButton()) {
                 if(driver.getAButtonPressed()) {
+                    camera.setLightState(LightMode.ON);
                     cameraAlign.resetPID();
-                    if(camera.getPipeIndex() != 1)
-                        camera.setPipeline(1);
+                    cameraAlign.setAlignHatch();
+                    camera.takeSnapshot();
                 }
                 cameraAlign.run();
             }
+            else if(driver.getAButtonReleased()) {
+                camera.takeSnapshot();
+                camera.setLightState(LightMode.OFF);
+            }
+            //Retrieval Alignment
             else if(driver.getXButton()) { //Hatch retrieval
                 if(driver.getXButtonPressed()) {
+                    camera.setLightState(LightMode.ON);
                     cameraAlign.resetPID();
-                    if(camera.getPipeIndex() != 2)
-                        camera.setPipeline(2);
+                    cameraAlign.setAlignRetrieval();
+                    camera.takeSnapshot();
                 }
                 cameraAlign.run();
             }
-            else if(driver.getYButton()) { //Cargo placement
+            else if(driver.getXButtonReleased()) {
+                camera.takeSnapshot();
+                camera.setLightState(LightMode.OFF);
+            }
+            //Cargo Alignment
+            else if(driver.getYButton()) {
                 if(driver.getYButtonPressed()) {
+                    camera.setLightState(LightMode.ON);
                     cameraAlign.resetPID();
-                    if(camera.getPipeIndex() != 3)
-                        camera.setPipeline(3);
+                    cameraAlign.setAlignRocketCargo();
+                    camera.takeSnapshot();
                 }
                 cameraAlign.run();
+            }
+            else if(driver.getYButtonReleased()) {
+                camera.takeSnapshot();
+                camera.setLightState(LightMode.OFF);
+            }
+            
+            //Manual Light Control
+            if(driver.getRawButtonPressed(8)) {
+                camera.setLightState(LightMode.ON);
+            }
+            else if(driver.getRawButtonPressed(7)) {
+                camera.setLightState(LightMode.OFF);
             }
         } 
 
         public void controlArm() {
             double speed = -assistant.getY(Hand.kLeft) * 0.65f;
+
+            if(assistant.getRawButton(7)){
+                arm.overrideLimit();
+            }
 
             // Switch back to user control if using it
             if (Math.abs(speed) > 0.2) {
@@ -135,7 +170,16 @@ public class OI {
         }
 
         public void controlWrist() {
-            wrist.setSpeed(-assistant.getY(Hand.kRight) * 0.6f);
+            double speed = -assistant.getY(Hand.kRight) * 0.6f;
+            if(assistant.getRawButtonPressed(8)) {
+                wrist.setPositionUp();
+            }
+
+            if(Math.abs(speed) > 0.1) {
+                wrist.disablePID();
+            }
+
+            wrist.setSpeed(speed);
         }
 
         public void controlFrontJacks() {
@@ -175,6 +219,69 @@ public class OI {
         }
     }
 
+    static class JoystickProfile extends DriverProfile {
+        @Override
+        public void controlFrontJacks() {
+            //Do nothing, inoperable in this mode.
+            return;
+        }
+
+        @Override
+        public void controlArmPID() {
+            //Do nothing, inoperable in this mode.
+            arm.disablePID();
+            return;
+        }
+
+        @Override
+        public void cameraDrive() {
+            //Do nothing, inoperable in this mode.
+            return;
+        }
+
+        @Override
+        public void controlWrist() {
+            wrist.setSpeed(assistant.getRawAxis(1));
+        }
+
+        @Override
+        public void controlRearJacks() {
+            //Inoperable, do nothing in this mode
+            return;
+        }
+        @Override
+        public void controlArm() {
+            //up
+            if(assistant.getRawButton(10)) {
+                arm.setSpeed(-0.65);
+            }
+            else if(assistant.getRawButton(11)) {
+                arm.setSpeed(0.65);
+            }
+            else {
+                arm.setSpeed(0);
+            }
+        }
+
+        @Override
+        public void controlRearJackWheel() {
+            //Do nothing, inoperable in this mode.
+            return;
+        }
+
+        @Override
+        public void controlIntake() {
+            if(assistant.getRawButton(7)) {
+                intake.setSpeed(-0.5f);
+            }
+            else if(assistant.getRawButton(6)) {
+                intake.setSpeed(0.5f);
+            }
+            else {
+                intake.setSpeed(0);
+            }
+        }
+    }
     // ---------------------------------------Logitech----------------------------------
     static class LogitechProfile extends DriverProfile {
         @Override

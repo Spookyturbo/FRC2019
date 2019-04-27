@@ -34,6 +34,8 @@ public class RobotMap {
     public final static class Encoders {
         public final static int armA = 8;
         public final static int armB = 9;
+
+        public final static int wrist = 18;
     }
 
 }   

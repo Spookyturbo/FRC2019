@@ -28,65 +28,76 @@ public class CameraAlign {
     private int timeout;
     Timer timer = new Timer();
 
-    PIDControl distanceController = new PIDControl(0.1);
-    PIDControl strafingController = new PIDControl(0.1, 0.01);
-    PIDControl rotationController = new PIDControl(0.05, 0.001);
+    public PIDControl strafingController = new PIDControl(0.1, 0.01);
+    public PIDControl distanceController = new PIDControl(0.15);
+    GyroTurning rotationController = GyroTurning.getInstance();
+
+    double[] hatchAngles = {-90, 90, 0, 151.25, -151.25, 28.75, -28.75};
+    double[] hatchRetrieval = {180, -180};
+    double[] rocketCargo = {90, -90};
+
+    double[] currentAngles;
 
     private CameraAlign() {
-        distanceController.setOutputRange(-0.5, 0.5);
         strafingController.setOutputRange(-0.5, 0.5);
-        rotationController.setOutputRange(-0.5, 0.5);
+        distanceController.setOutputRange(-0.5, 0.5);
 
-        distanceController.setInputRange(-20.5, 20.5);
         strafingController.setInputRange(-27, 27);
-        rotationController.setInputRange(-90, 0);
+        distanceController.setInputRange(0, 100);
 
-        distanceController.setTolerance(0.5);
         strafingController.setTolerance(0.5);
-        rotationController.setTolerance(1);
+        distanceController.setTolerance(0.2);
 
-        distanceController.setSetpoint(0);
         strafingController.setSetpoint(0);
-        rotationController.setSetpoint(-1.6);
+        distanceController.setSetpoint(4);
 
-        rotationController.setContinuous();
 
         strafingController.setMaxIContribution(0.3f);
         strafingController.setIKickInRate(2);
 
-        rotationController.setIKickInRate(2);
-
         // strafingController.initSmartDashboard("CameraStrafe");
-        // distanceController.initSmartDashboard("CameraDistance");
-        // rotationController.initSmartDashboard("CameraRotation");
         // LiveWindow.add(strafingController);
+    }
+
+    public void setAlignHatch() {
+        currentAngles = hatchAngles;
+        camera.setPipeline(0);
+        distanceController.setSetpoint(3.5);
+        //Distance Area 3.5
+    }
+
+    public void setAlignRetrieval() {
+        currentAngles = hatchRetrieval;
+        camera.setPipeline(1);
+        distanceController.setSetpoint(6.2499);
+        //Distance area 6.2499
+    }
+
+    public void setAlignRocketCargo() {
+        currentAngles = rocketCargo;
+        camera.setPipeline(2);
+        distanceController.setSetpoint(2.147);
+        //Distance area 2.147
     }
 
     public void run() {
         // strafingController.updateFromSmartDashboard("CameraStrafe");
-        // distanceController.updateFromSmartDashboard("CameraDistance");
-        // rotationController.updateFromSmartDashboard("CameraRotation");
-        // double[] yCorners = camera.getYCorners();
-
-        // double leftCorner = yCorners[1];
-        // double rightCorner = yCorners[0];
-
         if (camera.hasValidTarget()) {
+            double angle = rotationController.getAngle(); //adds the angle from center of camera to angle
             double strafingSpeed = -strafingController.calculate(camera.getXAngle());
-            double distanceSpeed = -distanceController.calculate(camera.getYAngle());
-            double rotationSpeed = rotationController.calculate(camera.getSkew());
-
-            // if(leftCorner < rightCorner) {
-            // rotationSpeed *= -1;
-            // }
-
-            // cant strafe and rotate at the same time unless less then this
-            // if(Math.abs(rotationSpeed) > 0.08) {
-            // strafingSpeed = 0;
-            // }
+            double distanceSpeed = -distanceController.calculate(camera.getArea());
+            double closestAngle = findClosestDouble(angle, currentAngles);
+            rotationController.setAngle(closestAngle);
 
             // Strafe to the indicated position
-            drive.driveCartesian(strafingSpeed, distanceSpeed, rotationSpeed);
+            /*   ^
+                 0
+            -90     90
+             -180/180
+            ____________
+            */
+            //-90, 90, 180, -180, 0, 151.25, -151.25, 28.75, -28.75
+            drive.driveCartesian(strafingSpeed, distanceSpeed, rotationController.getSpeed());
         }
     }
 
@@ -102,7 +113,7 @@ public class CameraAlign {
 
     // Returns if correctly aligned
     public boolean isAlligned() {
-        return strafingController.onTarget() && distanceController.onTarget() && rotationController.onTarget();
+        return strafingController.onTarget() && rotationController.onTarget();
     }
 
     public boolean isCompleted() {
@@ -118,9 +129,8 @@ public class CameraAlign {
     // So that the derivative error and integral error
     // start correctly
     public void resetPID() {
-        distanceController.reset();
         strafingController.reset();
-        rotationController.reset();
+        rotationController.resetPID();
     }
 
     public static CameraAlign getInstance() {
@@ -129,5 +139,19 @@ public class CameraAlign {
         }
 
         return instance;
+    }
+
+    public double findClosestDouble(double n, double[] values) {
+        double bestN = values[0];
+        double smallestDistance = Math.abs(n - bestN);
+
+        for(int i = 0; i < values.length; i++) {
+            if(Math.abs(n - values[i]) < smallestDistance) {
+                bestN = values[i];
+                smallestDistance = Math.abs(n - bestN);
+            }
+        }
+
+        return bestN;
     }
 }

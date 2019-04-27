@@ -1,6 +1,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
@@ -12,6 +13,7 @@ import frc.component.Intake;
 import frc.component.Jacks;
 import frc.component.Wrist;
 import frc.procedure.CameraAlign;
+import frc.procedure.GyroTurning;
 import frc.sensor.Limelight;
 import frc.util.Component;
 import frc.util.Debug;
@@ -29,10 +31,9 @@ import com.kauailabs.navx.frc.AHRS;
 
 public class Robot extends TimedRobot {
     ArrayList<Component> components = new ArrayList<>();
-    // Xbox Control
-    AHRS gyro;
 
     OI.DriverProfile controlProfile;
+    XboxController driver;
 
     Drive drive;
     Jacks jacks;
@@ -53,6 +54,7 @@ public class Robot extends TimedRobot {
 
         // Init here, should be overwritten in telopinit
         controlProfile = OI.getProfile(OI.MAIN_DRIVER_PROFILE);
+        driver = controlProfile.driver;
 
         // Store in cleaner variables
         drive = Drive.getInstance();
@@ -60,6 +62,8 @@ public class Robot extends TimedRobot {
         intake = Intake.getInstance();
         wrist = Wrist.getInstance();
         arm = Arm.getInstance();
+
+        GyroTurning.getInstance().resetGyro();
 
         components.add(drive);
         components.add(jacks);
@@ -75,18 +79,9 @@ public class Robot extends TimedRobot {
         m_chooser.setDefaultOption("Feaven", OI.MAIN_DRIVER_PROFILE);
         m_chooser.addOption("Logitech", OI.LOGITECH_CONTROLLER);
         m_chooser.addOption("Admin", OI.ADMIN_PROFILE);
+        m_chooser.addOption("Joystick", OI.JOYSTICK_CONTROLLER);
 
         SmartDashboard.putData("Driver Mode", m_chooser);
-
-        // If the gyro is not plugged in this can throw an error, make sure it doesn't
-        // crash the robot
-        try {
-            gyro = new AHRS(SPI.Port.kMXP);
-            gyro.setName("Gyro", "Angle");
-            // LiveWindow.add(gyro);
-        } catch (RuntimeException e) {
-            DriverStation.reportError("Error instantiating navX MXP:  " + e.getMessage(), true);
-        }
 
         Limelight.getInstance().setLightState(Limelight.LightMode.OFF);
     }
@@ -112,14 +107,13 @@ public class Robot extends TimedRobot {
         }
         // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
         // Set the camera values
-        Limelight.getInstance().setPipeline(1);
-        Limelight.getInstance().setLightState(Limelight.LightMode.ON);
+        Limelight.getInstance().setPipeline(0);
         // CameraAlign camera = CameraAlign.getInstance();
         // camera.align(5);
         // while(!camera.isCompleted()) {
         //     camera.run();
         // }
-
+        GyroTurning.getInstance().resetGyro();
     }
 
     /**
@@ -127,21 +121,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void autonomousPeriodic() {
-
-        controlProfile.drive();
-        controlProfile.cameraDrive();
-
-        controlProfile.controlArm();
-        controlProfile.controlArmPID();
-
-        controlProfile.controlFrontJacks();
-        controlProfile.controlRearJackWheel();
-        controlProfile.controlRearJacks();
-
-        controlProfile.controlWrist();
-        controlProfile.controlIntake();
-
-        updateAllComponents();
+        teleopPeriodic();
     }
 
     @Override
@@ -153,14 +133,14 @@ public class Robot extends TimedRobot {
         }
 
         // Set the camera values
-        Limelight.getInstance().setPipeline(1);
-        Limelight.getInstance().setLightState(Limelight.LightMode.ON);
+        Limelight.getInstance().setPipeline(0);
     }
 
     /**
      * This function is called periodically during operator control.
      */
     // leftEncoder = 8,9
+    GyroTurning gyro = GyroTurning.getInstance();
     @Override
     public void teleopPeriodic() {
         // double[] yCorners = Limelight.getInstance().getYCorners();
@@ -172,7 +152,30 @@ public class Robot extends TimedRobot {
 
         controlProfile.drive();
         controlProfile.cameraDrive();
+        if(driver.getBButton()) {
+            gyro.resetGyro();
+            gyro.resetPID();
+        }
+        // if(driver.getAButton()) {
+        //     gyro.resetGyro();
+        //     gyro.resetPID();
+        // }
 
+        // if(driver.getBButton()) {
+        //     gyro.setAngle(90);
+        //     drive.driveCartesian(0, 0, gyro.getSpeed());
+        // }
+
+        // if(driver.getXButton()) {
+        //     gyro.setAngle(-90);
+        //     drive.driveCartesian(0, 0, gyro.getSpeed());
+        // }
+
+        // if(driver.getYButton()) {
+        //     gyro.setAngle(-180);
+        //     drive.driveCartesian(0, 0, gyro.getSpeed());
+        // }
+        
         controlProfile.controlArm();
         controlProfile.controlArmPID();
 
